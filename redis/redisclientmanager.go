@@ -3,6 +3,7 @@ package redis
 import (
 	"crypto/tls"
 	red "github.com/go-redis/redis/v8"
+	"github.com/leafney/rose-redis"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
 
 //var clientManager = syncx.NewResourceManager()
 
-func getClient(r *Redis) (*red.Client, error) {
+func getClient(r *rredis.Redis) (*red.Client, error) {
 	var tlsConfig *tls.Config
 	if r.Tls {
 		tlsConfig = &tls.Config{

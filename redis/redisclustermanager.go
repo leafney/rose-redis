@@ -2,6 +2,7 @@ package redis
 
 import (
 	"crypto/tls"
+	"github.com/leafney/rose-redis"
 	"strings"
 
 	red "github.com/go-redis/redis/v8"
@@ -9,7 +10,7 @@ import (
 
 const addrSep = ","
 
-func getCluster(r *Redis) (*red.ClusterClient, error) {
+func getCluster(r *rredis.Redis) (*red.ClusterClient, error) {
 	//val, err := clusterManager.GetResource(r.Addr, func() (io.Closer, error) {
 	//	var tlsConfig *tls.Config
 	//	if r.tls {
