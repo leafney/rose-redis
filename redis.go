@@ -2,6 +2,7 @@ package rredis
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	red "github.com/go-redis/redis/v8"
 	"time"
@@ -18,6 +19,10 @@ const (
 	blockingQueryTimeout = 5 * time.Second
 	readWriteTimeout     = 2 * time.Second
 	defaultSlowThreshold = time.Millisecond * 100
+
+	defaultDatabase = 0
+	maxRetries      = 3
+	idleConns       = 8
 )
 
 type (
@@ -25,14 +30,13 @@ type (
 
 	Redis struct {
 		client    red.UniversalClient
+		isCluster bool
 		Addr      string
 		Type      string
 		Pass      string
 		Db        int
 		Tls       bool
-		isCluster bool
 	}
-
 )
 
 func NewRedis(addr string, opts ...Option) (*Redis, error) {
@@ -41,17 +45,30 @@ func NewRedis(addr string, opts ...Option) (*Redis, error) {
 	r := new(Redis)
 
 	if rdc.isCluster {
-		options := &red.ClusterOptions{
-			Addrs:    []string{rdc.Addr}, //TODO
-			Password: rdc.Pass,
+		var tlsConfig *tls.Config
+		if rdc.Tls {
+			tlsConfig = &tls.Config{
+				InsecureSkipVerify: true,
+			}
 		}
+
+		options := &red.ClusterOptions{
+			Addrs:        splitClusterAddr(rdc.Addr),
+			Password:     rdc.Pass,
+			TLSConfig:    tlsConfig,
+			MaxRetries:   maxRetries,
+			MinIdleConns: idleConns,
+		}
+
 		client := red.NewClusterClient(options)
 		r = &Redis{client: client}
 	} else {
 		options := &red.Options{
-			Addr:     rdc.Addr,
-			Password: rdc.Pass,
-			DB:       rdc.Db,
+			Addr:         rdc.Addr,
+			Password:     rdc.Pass,
+			DB:           rdc.Db,
+			MaxRetries:   maxRetries,
+			MinIdleConns: idleConns,
 		}
 		client := red.NewClient(options)
 		r = &Redis{client: client}
@@ -68,7 +85,7 @@ func newRedis(addr string, opts ...Option) *Redis {
 	r := &Redis{
 		Addr: addr,
 		Type: NodeType,
-		Db: 0,
+		Db:   defaultDatabase,
 		Pass: "",
 	}
 
@@ -82,6 +99,8 @@ func newRedis(addr string, opts ...Option) *Redis {
 
 	return r
 }
+
+// ------------------------
 
 // Ping is the implementation of redis ping command.
 func (s *Redis) Ping() bool {
