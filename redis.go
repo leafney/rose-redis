@@ -37,6 +37,28 @@ type (
 		Db        int
 		Tls       bool
 	}
+
+	// GeoLocation is used with GeoAdd to add geospatial location.
+	GeoLocation = red.GeoLocation
+	// GeoRadiusQuery is used with GeoRadius to query geospatial index.
+	GeoRadiusQuery = red.GeoRadiusQuery
+	// GeoPos is used to represent a geo position.
+	GeoPos = red.GeoPos
+
+	// Pipeliner is an alias of redis.Pipeliner.
+	Pipeliner = red.Pipeliner
+
+	// Z represents sorted set member.
+	Z = red.Z
+	// ZStore is an alias of redis.ZStore.
+	ZStore = red.ZStore
+
+	// IntCmd is an alias of redis.IntCmd.
+	IntCmd = red.IntCmd
+	// FloatCmd is an alias of redis.FloatCmd.
+	FloatCmd = red.FloatCmd
+	// StringCmd is an alias of redis.StringCmd.
+	StringCmd = red.StringCmd
 )
 
 func NewRedis(addr string, opts ...Option) (*Redis, error) {
@@ -183,6 +205,230 @@ func (s *Redis) BitPosCtx(ctx context.Context, key string, bit, start, end int64
 	return s.client.BitPos(ctx, key, bit, start, end).Result()
 }
 
+//
+//// Blpop uses passed in redis connection to execute blocking queries.
+//// Doesn't benefit from pooling redis connections of blocking queries
+//func (s *Redis) Blpop(node RedisNode, key string) (string, error) {
+//	return s.BlpopCtx(context.Background(), node, key)
+//}
+//
+//// BlpopCtx uses passed in redis connection to execute blocking queries.
+//// Doesn't benefit from pooling redis connections of blocking queries
+//func (s *Redis) BlpopCtx(ctx context.Context, node RedisNode, key string) (string, error) {
+//	return s.BlpopWithTimeoutCtx(ctx, node, blockingQueryTimeout, key)
+//}
+//
+//// BlpopEx uses passed in redis connection to execute blpop command.
+//// The difference against Blpop is that this method returns a bool to indicate success.
+//func (s *Redis) BlpopEx(node RedisNode, key string) (string, bool, error) {
+//	return s.BlpopExCtx(context.Background(), node, key)
+//}
+//
+//// BlpopExCtx uses passed in redis connection to execute blpop command.
+//// The difference against Blpop is that this method returns a bool to indicate success.
+//func (s *Redis) BlpopExCtx(ctx context.Context, node RedisNode, key string) (string, bool, error) {
+//	if node == nil {
+//		return "", false, ErrNilNode
+//	}
+//
+//	vals, err := node.BLPop(ctx, blockingQueryTimeout, key).Result()
+//	if err != nil {
+//		return "", false, err
+//	}
+//
+//	if len(vals) < 2 {
+//		return "", false, fmt.Errorf("no value on key: %s", key)
+//	}
+//
+//	return vals[1], true, nil
+//}
+//
+//
+//// BlpopWithTimeout uses passed in redis connection to execute blpop command.
+//// Control blocking query timeout
+//func (s *Redis) BlpopWithTimeout(node RedisNode, timeout time.Duration, key string) (string, error) {
+//	return s.BlpopWithTimeoutCtx(context.Background(), node, timeout, key)
+//}
+//
+//// BlpopWithTimeoutCtx uses passed in redis connection to execute blpop command.
+//// Control blocking query timeout
+//func (s *Redis) BlpopWithTimeoutCtx(ctx context.Context, node RedisNode, timeout time.Duration,
+//	key string) (string, error) {
+//	if node == nil {
+//		return "", ErrNilNode
+//	}
+//
+//	vals, err := node.BLPop(ctx, timeout, key).Result()
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	if len(vals) < 2 {
+//		return "", fmt.Errorf("no value on key: %s", key)
+//	}
+//
+//	return vals[1], nil
+//}
+
+// ------------------------
+
+// Decr is the implementation of redis decr command.
+func (s *Redis) Decr(key string) (int64, error) {
+	return s.DecrCtx(context.Background(), key)
+}
+
+// DecrCtx is the implementation of redis decr command.
+func (s *Redis) DecrCtx(ctx context.Context, key string) (val int64, err error) {
+	return s.client.Decr(ctx, key).Result()
+}
+
+// Decrby is the implementation of redis decrby command.
+func (s *Redis) Decrby(key string, decrement int64) (int64, error) {
+	return s.DecrbyCtx(context.Background(), key, decrement)
+}
+
+// DecrbyCtx is the implementation of redis decrby command.
+func (s *Redis) DecrbyCtx(ctx context.Context, key string, decrement int64) (val int64, err error) {
+	return s.client.DecrBy(ctx, key, decrement).Result()
+}
+
+// Del deletes keys.
+func (s *Redis) Del(keys ...string) (int64, error) {
+	return s.DelCtx(context.Background(), keys...)
+}
+
+// DelCtx deletes keys.
+func (s *Redis) DelCtx(ctx context.Context, keys ...string) (val int64, err error) {
+	return s.client.Del(ctx, keys...).Result()
+}
+
+// Eval is the implementation of redis eval command.
+func (s *Redis) Eval(script string, keys []string, args ...interface{}) (interface{}, error) {
+	return s.EvalCtx(context.Background(), script, keys, args...)
+}
+
+// EvalCtx is the implementation of redis eval command.
+func (s *Redis) EvalCtx(ctx context.Context, script string, keys []string,
+	args ...interface{}) (val interface{}, err error) {
+	return s.client.Eval(ctx, script, keys, args...).Result()
+}
+
+// EvalSha is the implementation of redis evalsha command.
+func (s *Redis) EvalSha(sha string, keys []string, args ...interface{}) (interface{}, error) {
+	return s.EvalShaCtx(context.Background(), sha, keys, args...)
+}
+
+// EvalShaCtx is the implementation of redis evalsha command.
+func (s *Redis) EvalShaCtx(ctx context.Context, sha string, keys []string,
+	args ...interface{}) (val interface{}, err error) {
+	return s.client.EvalSha(ctx, sha, keys, args...).Result()
+}
+
+// Exists is the implementation of redis exists command.
+func (s *Redis) Exists(key string) (bool, error) {
+	return s.ExistsCtx(context.Background(), key)
+}
+
+// ExistsCtx is the implementation of redis exists command.
+func (s *Redis) ExistsCtx(ctx context.Context, key string) (val bool, err error) {
+	v, err := s.client.Exists(ctx, key).Result()
+	if err != nil {
+		return false, err
+	}
+
+	val = v == 1
+	return
+}
+
+// Expire is the implementation of redis expire command.
+func (s *Redis) Expire(key string, seconds int64) error {
+	return s.ExpireCtx(context.Background(), key, seconds)
+}
+
+// ExpireCtx is the implementation of redis expire command.
+func (s *Redis) ExpireCtx(ctx context.Context, key string, seconds int64) error {
+	return s.client.Expire(ctx, key, time.Duration(seconds)*time.Second).Err()
+}
+
+// Expireat is the implementation of redis expireat command.
+func (s *Redis) Expireat(key string, expireTime int64) error {
+	return s.ExpireatCtx(context.Background(), key, expireTime)
+}
+
+// ExpireatCtx is the implementation of redis expireat command.
+func (s *Redis) ExpireatCtx(ctx context.Context, key string, expireTime int64) error {
+	return s.client.ExpireAt(ctx, key, time.Unix(expireTime, 0)).Err()
+}
+
+// ------------------------
+
+// GeoAdd is the implementation of redis geoadd command.
+func (s *Redis) GeoAdd(key string, geoLocation ...*GeoLocation) (int64, error) {
+	return s.GeoAddCtx(context.Background(), key, geoLocation...)
+}
+
+// GeoAddCtx is the implementation of redis geoadd command.
+func (s *Redis) GeoAddCtx(ctx context.Context, key string, geoLocation ...*GeoLocation) (
+	val int64, err error) {
+	return s.client.GeoAdd(ctx, key, geoLocation...).Result()
+}
+
+// GeoDist is the implementation of redis geodist command.
+func (s *Redis) GeoDist(key, member1, member2, unit string) (float64, error) {
+	return s.GeoDistCtx(context.Background(), key, member1, member2, unit)
+}
+
+// GeoDistCtx is the implementation of redis geodist command.
+func (s *Redis) GeoDistCtx(ctx context.Context, key, member1, member2, unit string) (
+	val float64, err error) {
+	return s.client.GeoDist(ctx, key, member1, member2, unit).Result()
+}
+
+// GeoHash is the implementation of redis geohash command.
+func (s *Redis) GeoHash(key string, members ...string) ([]string, error) {
+	return s.GeoHashCtx(context.Background(), key, members...)
+}
+
+// GeoHashCtx is the implementation of redis geohash command.
+func (s *Redis) GeoHashCtx(ctx context.Context, key string, members ...string) (
+	val []string, err error) {
+	return s.client.GeoHash(ctx, key, members...).Result()
+}
+
+// GeoRadius is the implementation of redis georadius command.
+func (s *Redis) GeoRadius(key string, longitude, latitude float64, query *GeoRadiusQuery) (
+	[]GeoLocation, error) {
+	return s.GeoRadiusCtx(context.Background(), key, longitude, latitude, query)
+}
+
+// GeoRadiusCtx is the implementation of redis georadius command.
+func (s *Redis) GeoRadiusCtx(ctx context.Context, key string, longitude, latitude float64,
+	query *GeoRadiusQuery) (val []GeoLocation, err error) {
+	return s.client.GeoRadius(ctx, key, longitude, latitude, query).Result()
+}
+
+// GeoRadiusByMember is the implementation of redis georadiusbymember command.
+func (s *Redis) GeoRadiusByMember(key, member string, query *GeoRadiusQuery) ([]GeoLocation, error) {
+	return s.GeoRadiusByMemberCtx(context.Background(), key, member, query)
+}
+
+// GeoRadiusByMemberCtx is the implementation of redis georadiusbymember command.
+func (s *Redis) GeoRadiusByMemberCtx(ctx context.Context, key, member string,
+	query *GeoRadiusQuery) (val []GeoLocation, err error) {
+	return s.client.GeoRadiusByMember(ctx, key, member, query).Result()
+}
+
+// GeoPos is the implementation of redis geopos command.
+func (s *Redis) GeoPos(key string, members ...string) ([]*GeoPos, error) {
+	return s.GeoPosCtx(context.Background(), key, members...)
+}
+
+// GeoPosCtx is the implementation of redis geopos command.
+func (s *Redis) GeoPosCtx(ctx context.Context, key string, members ...string) (
+	val []*GeoPos, err error) {
+	return s.client.GeoPos(ctx, key, members...).Result()
+}
+
 // ------------------------
 
 // Set is the implementation of redis set command.
@@ -210,3 +456,28 @@ func (s *Redis) GetCtx(ctx context.Context, key string) (val string, err error) 
 		return val, nil
 	}
 }
+
+// GetBit is the implementation of redis getbit command.
+func (s *Redis) GetBit(key string, offset int64) (int64, error) {
+	return s.GetBitCtx(context.Background(), key, offset)
+}
+
+// GetBitCtx is the implementation of redis getbit command.
+func (s *Redis) GetBitCtx(ctx context.Context, key string, offset int64) (val int64, err error) {
+	return s.client.GetBit(ctx, key, offset).Result()
+}
+
+// GetSet is the implementation of redis getset command.
+func (s *Redis) GetSet(key, value string) (string, error) {
+	return s.GetSetCtx(context.Background(), key, value)
+}
+
+// GetSetCtx is the implementation of redis getset command.
+func (s *Redis) GetSetCtx(ctx context.Context, key, value string) (val string, err error) {
+	if val, err = s.client.GetSet(ctx, key, value).Result(); err == red.Nil {
+		return val, nil
+	}
+	return "", err
+}
+
+// ------------------------
