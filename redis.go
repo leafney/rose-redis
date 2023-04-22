@@ -8,11 +8,13 @@ import (
 	"time"
 )
 
+type RType string
+
 const (
-	// ClusterType means redis cluster.
-	ClusterType = "cluster"
-	// NodeType means redis node.
-	NodeType = "node"
+	// TypeCluster means redis cluster.
+	TypeCluster RType = "cluster"
+	// TypeNode means redis node.
+	TypeNode RType = "node"
 	// Nil is an alias of redis.Nil.
 	Nil = red.Nil
 
@@ -32,7 +34,7 @@ type (
 		client    red.UniversalClient
 		isCluster bool
 		Addr      string
-		Type      string
+		Type      RType
 		Pass      string
 		Db        int
 		Tls       bool
@@ -106,7 +108,7 @@ func newRedis(addr string, opts ...Option) *Redis {
 	// Initial configuration
 	r := &Redis{
 		Addr: addr,
-		Type: NodeType,
+		Type: TypeNode,
 		Db:   defaultDatabase,
 		Pass: "",
 	}
@@ -117,12 +119,20 @@ func newRedis(addr string, opts ...Option) *Redis {
 	}
 
 	// is cluster mode
-	r.isCluster = r.Type == ClusterType
+	r.isCluster = r.Type == TypeCluster
 
 	return r
 }
 
 // ------------------------
+
+// Close
+func (s *Redis) Close() error {
+	if s.client != nil {
+		return s.client.Close()
+	}
+	return nil
+}
 
 // Ping is the implementation of redis ping command.
 func (s *Redis) Ping() bool {
