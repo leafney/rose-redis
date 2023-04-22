@@ -6,10 +6,12 @@ import (
 
 func TestNewRedis(t *testing.T) {
 
-	client, err := NewRedis("127.0.0.1:6379", func(r *Redis) {
-		r.Db = 3
-		r.Type = TypeNode
+	//client, err := NewRedis("127.0.0.1:6379", nil)
+	client, err := NewRedis("127.0.0.1:6379", &Option{
+		Db:   3,
+		Type: TypeNode,
 	})
+
 	if err != nil {
 		t.Error(err)
 		return

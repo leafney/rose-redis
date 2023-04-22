@@ -9,7 +9,7 @@ go get -u github.com/leafney/rose-redis
 ## Use
 
 ```go
-	client,err := rredis.NewRedis("127.0.0.1:6379")
+	client,err := rredis.NewRedis("127.0.0.1:6379", nil)
 	if err != nil{
 		fmt.Println(err)
 		return
