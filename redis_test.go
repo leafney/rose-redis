@@ -18,6 +18,6 @@ func TestNewRedis(t *testing.T) {
 	}
 	defer client.Close()
 
-	client.Set("abcdef", "hello22")
+	client.Set("abcdef", "hello")
 
 }

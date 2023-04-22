@@ -22,31 +22,23 @@ const (
 	readWriteTimeout     = 2 * time.Second
 	defaultSlowThreshold = time.Millisecond * 100
 
-	defaultDatabase = 0
-	maxRetries      = 3
-	idleConns       = 8
+	defDatabase = 0
+	maxRetries  = 3
+	idleConns   = 8
 )
 
 type (
-	//Option func(r *Redis)
 	Option struct {
 		isCluster bool
-		//addr      string
-		Type RType
-		Pwd  string
-		Db   int
-		Tls  bool
+		Type      RType
+		Pwd       string
+		Db        int
+		Tls       bool
 	}
 
 	Redis struct {
 		client red.UniversalClient
 		ctx    context.Context
-		//isCluster bool
-		//Addr      string
-		//Type      RType
-		//Pwd      string
-		//Db        int
-		//Tls       bool
 	}
 
 	// GeoLocation is used with GeoAdd to add geospatial location.
@@ -74,7 +66,6 @@ type (
 
 func NewRedis(addr string, opt *Option) (*Redis, error) {
 	rdc := loadOption(opt)
-
 	r := new(Redis)
 
 	if rdc.isCluster {
@@ -118,7 +109,7 @@ func NewRedis(addr string, opt *Option) (*Redis, error) {
 //r := &Redis{
 //	Addr: addr,
 //	Type: TypeNode,
-//	Db:   defaultDatabase,
+//	Db:   defDatabase,
 //	Pwd:  "",
 //}
 //
@@ -137,7 +128,7 @@ func NewRedis(addr string, opt *Option) (*Redis, error) {
 func loadOption(opt *Option) *Option {
 	o := &Option{
 		Type:      TypeNode,
-		Db:        defaultDatabase,
+		Db:        defDatabase,
 		isCluster: false,
 		Pwd:       "",
 		Tls:       false,
@@ -185,69 +176,6 @@ func (s *Redis) PingCtx(ctx context.Context) (val bool) {
 }
 
 // ------------------------
-
-// BitCount is redis bitcount command implementation.
-func (s *Redis) BitCount(key string, start, end int64) (int64, error) {
-	return s.BitCountCtx(s.ctx, key, start, end)
-}
-
-// BitCountCtx is redis bitcount command implementation.
-func (s *Redis) BitCountCtx(ctx context.Context, key string, start, end int64) (val int64, err error) {
-	return s.client.BitCount(ctx, key, &red.BitCount{
-		Start: start,
-		End:   end,
-	}).Result()
-}
-
-// BitOpAnd is redis bit operation (and) command implementation.
-func (s *Redis) BitOpAnd(destKey string, keys ...string) (int64, error) {
-	return s.BitOpAndCtx(s.ctx, destKey, keys...)
-}
-
-// BitOpAndCtx is redis bit operation (and) command implementation.
-func (s *Redis) BitOpAndCtx(ctx context.Context, destKey string, keys ...string) (val int64, err error) {
-	return s.client.BitOpAnd(ctx, destKey, keys...).Result()
-}
-
-// BitOpNot is redis bit operation (not) command implementation.
-func (s *Redis) BitOpNot(destKey, key string) (int64, error) {
-	return s.BitOpNotCtx(s.ctx, destKey, key)
-}
-
-// BitOpNotCtx is redis bit operation (not) command implementation.
-func (s *Redis) BitOpNotCtx(ctx context.Context, destKey, key string) (val int64, err error) {
-	return s.client.BitOpNot(ctx, destKey, key).Result()
-}
-
-// BitOpOr is redis bit operation (or) command implementation.
-func (s *Redis) BitOpOr(destKey string, keys ...string) (int64, error) {
-	return s.BitOpOrCtx(s.ctx, destKey, keys...)
-}
-
-// BitOpOrCtx is redis bit operation (or) command implementation.
-func (s *Redis) BitOpOrCtx(ctx context.Context, destKey string, keys ...string) (val int64, err error) {
-	return s.client.BitOpOr(ctx, destKey, keys...).Result()
-}
-
-// BitOpXor is redis bit operation (xor) command implementation.
-func (s *Redis) BitOpXor(destKey string, keys ...string) (int64, error) {
-	return s.BitOpXorCtx(s.ctx, destKey, keys...)
-}
-
-// BitOpXorCtx is redis bit operation (xor) command implementation.
-func (s *Redis) BitOpXorCtx(ctx context.Context, destKey string, keys ...string) (val int64, err error) {
-	return s.client.BitOpXor(ctx, destKey, keys...).Result()
-}
-
-// BitPos is redis bitpos command implementation.
-func (s *Redis) BitPos(key string, bit, start, end int64) (int64, error) {
-	return s.BitPosCtx(s.ctx, key, bit, start, end)
-}
-
-// BitPosCtx is redis bitpos command implementation.
-func (s *Redis) BitPosCtx(ctx context.Context, key string, bit, start, end int64) (val int64, err error) {
-	return s.client.BitPos(ctx, key, bit, start, end).Result()
-}
 
 //
 //// Blpop uses passed in redis connection to execute blocking queries.
@@ -313,425 +241,5 @@ func (s *Redis) BitPosCtx(ctx context.Context, key string, bit, start, end int64
 //
 //	return vals[1], nil
 //}
-
-// ------------------------
-
-// Del deletes keys.
-func (s *Redis) Del(keys ...string) (int64, error) {
-	return s.DelCtx(s.ctx, keys...)
-}
-
-// DelCtx deletes keys.
-func (s *Redis) DelCtx(ctx context.Context, keys ...string) (val int64, err error) {
-	return s.client.Del(ctx, keys...).Result()
-}
-
-// Eval is the implementation of redis eval command.
-func (s *Redis) Eval(script string, keys []string, args ...interface{}) (interface{}, error) {
-	return s.EvalCtx(s.ctx, script, keys, args...)
-}
-
-// EvalCtx is the implementation of redis eval command.
-func (s *Redis) EvalCtx(ctx context.Context, script string, keys []string,
-	args ...interface{}) (val interface{}, err error) {
-	return s.client.Eval(ctx, script, keys, args...).Result()
-}
-
-// EvalSha is the implementation of redis evalsha command.
-func (s *Redis) EvalSha(sha string, keys []string, args ...interface{}) (interface{}, error) {
-	return s.EvalShaCtx(s.ctx, sha, keys, args...)
-}
-
-// EvalShaCtx is the implementation of redis evalsha command.
-func (s *Redis) EvalShaCtx(ctx context.Context, sha string, keys []string,
-	args ...interface{}) (val interface{}, err error) {
-	return s.client.EvalSha(ctx, sha, keys, args...).Result()
-}
-
-// Exists is the implementation of redis exists command.
-func (s *Redis) Exists(key string) (bool, error) {
-	return s.ExistsCtx(s.ctx, key)
-}
-
-// ExistsCtx is the implementation of redis exists command.
-func (s *Redis) ExistsCtx(ctx context.Context, key string) (val bool, err error) {
-	v, err := s.client.Exists(ctx, key).Result()
-	if err != nil {
-		return false, err
-	}
-
-	val = v == 1
-	return
-}
-
-// Expire is the implementation of redis expire command.
-func (s *Redis) Expire(key string, seconds int64) error {
-	return s.ExpireCtx(s.ctx, key, seconds)
-}
-
-// ExpireCtx is the implementation of redis expire command.
-func (s *Redis) ExpireCtx(ctx context.Context, key string, seconds int64) error {
-	return s.client.Expire(ctx, key, time.Duration(seconds)*time.Second).Err()
-}
-
-// ExpireAt is the implementation of redis expireat command.
-func (s *Redis) ExpireAt(key string, expireTime int64) error {
-	return s.ExpireAtCtx(s.ctx, key, expireTime)
-}
-
-// ExpireAtCtx is the implementation of redis expireat command.
-func (s *Redis) ExpireAtCtx(ctx context.Context, key string, expireTime int64) error {
-	return s.client.ExpireAt(ctx, key, time.Unix(expireTime, 0)).Err()
-}
-
-// Keys is the implementation of redis keys command.
-func (s *Redis) Keys(pattern string) ([]string, error) {
-	return s.KeysCtx(s.ctx, pattern)
-}
-
-// KeysCtx is the implementation of redis keys command.
-func (s *Redis) KeysCtx(ctx context.Context, pattern string) (val []string, err error) {
-	return s.client.Keys(ctx, pattern).Result()
-}
-
-// ------------------------
-
-// GeoAdd is the implementation of redis geoadd command.
-func (s *Redis) GeoAdd(key string, geoLocation ...*GeoLocation) (int64, error) {
-	return s.GeoAddCtx(s.ctx, key, geoLocation...)
-}
-
-// GeoAddCtx is the implementation of redis geoadd command.
-func (s *Redis) GeoAddCtx(ctx context.Context, key string, geoLocation ...*GeoLocation) (
-	val int64, err error) {
-	return s.client.GeoAdd(ctx, key, geoLocation...).Result()
-}
-
-// GeoDist is the implementation of redis geodist command.
-func (s *Redis) GeoDist(key, member1, member2, unit string) (float64, error) {
-	return s.GeoDistCtx(s.ctx, key, member1, member2, unit)
-}
-
-// GeoDistCtx is the implementation of redis geodist command.
-func (s *Redis) GeoDistCtx(ctx context.Context, key, member1, member2, unit string) (
-	val float64, err error) {
-	return s.client.GeoDist(ctx, key, member1, member2, unit).Result()
-}
-
-// GeoHash is the implementation of redis geohash command.
-func (s *Redis) GeoHash(key string, members ...string) ([]string, error) {
-	return s.GeoHashCtx(s.ctx, key, members...)
-}
-
-// GeoHashCtx is the implementation of redis geohash command.
-func (s *Redis) GeoHashCtx(ctx context.Context, key string, members ...string) (
-	val []string, err error) {
-	return s.client.GeoHash(ctx, key, members...).Result()
-}
-
-// GeoRadius is the implementation of redis georadius command.
-func (s *Redis) GeoRadius(key string, longitude, latitude float64, query *GeoRadiusQuery) (
-	[]GeoLocation, error) {
-	return s.GeoRadiusCtx(s.ctx, key, longitude, latitude, query)
-}
-
-// GeoRadiusCtx is the implementation of redis georadius command.
-func (s *Redis) GeoRadiusCtx(ctx context.Context, key string, longitude, latitude float64,
-	query *GeoRadiusQuery) (val []GeoLocation, err error) {
-	return s.client.GeoRadius(ctx, key, longitude, latitude, query).Result()
-}
-
-// GeoRadiusByMember is the implementation of redis georadiusbymember command.
-func (s *Redis) GeoRadiusByMember(key, member string, query *GeoRadiusQuery) ([]GeoLocation, error) {
-	return s.GeoRadiusByMemberCtx(s.ctx, key, member, query)
-}
-
-// GeoRadiusByMemberCtx is the implementation of redis georadiusbymember command.
-func (s *Redis) GeoRadiusByMemberCtx(ctx context.Context, key, member string,
-	query *GeoRadiusQuery) (val []GeoLocation, err error) {
-	return s.client.GeoRadiusByMember(ctx, key, member, query).Result()
-}
-
-// GeoPos is the implementation of redis geopos command.
-func (s *Redis) GeoPos(key string, members ...string) ([]*GeoPos, error) {
-	return s.GeoPosCtx(s.ctx, key, members...)
-}
-
-// GeoPosCtx is the implementation of redis geopos command.
-func (s *Redis) GeoPosCtx(ctx context.Context, key string, members ...string) (
-	val []*GeoPos, err error) {
-	return s.client.GeoPos(ctx, key, members...).Result()
-}
-
-// ------------------------
-
-// Set is the implementation of redis set command.
-func (s *Redis) Set(key, value string) error {
-	return s.SetCtx(s.ctx, key, value)
-}
-
-// SetCtx is the implementation of redis set command.
-func (s *Redis) SetCtx(ctx context.Context, key, value string) error {
-	return s.client.Set(ctx, key, value, 0).Err()
-}
-
-// Get is the implementation of redis get command.
-func (s *Redis) Get(key string) (string, error) {
-	return s.GetCtx(s.ctx, key)
-}
-
-// GetCtx is the implementation of redis get command.
-func (s *Redis) GetCtx(ctx context.Context, key string) (val string, err error) {
-	if val, err = s.client.Get(ctx, key).Result(); err == red.Nil {
-		return val, nil
-	} else if err != nil {
-		return "", err
-	} else {
-		return val, nil
-	}
-}
-
-// GetSet is the implementation of redis getset command.
-func (s *Redis) GetSet(key, value string) (string, error) {
-	return s.GetSetCtx(s.ctx, key, value)
-}
-
-// GetSetCtx is the implementation of redis getset command.
-func (s *Redis) GetSetCtx(ctx context.Context, key, value string) (val string, err error) {
-	if val, err = s.client.GetSet(ctx, key, value).Result(); err == red.Nil {
-		return val, nil
-	}
-	return "", err
-}
-
-// GetBit is the implementation of redis getbit command.
-func (s *Redis) GetBit(key string, offset int64) (int64, error) {
-	return s.GetBitCtx(s.ctx, key, offset)
-}
-
-// GetBitCtx is the implementation of redis getbit command.
-func (s *Redis) GetBitCtx(ctx context.Context, key string, offset int64) (val int64, err error) {
-	return s.client.GetBit(ctx, key, offset).Result()
-}
-
-// Incr is the implementation of redis incr command.
-func (s *Redis) Incr(key string) (int64, error) {
-	return s.IncrCtx(s.ctx, key)
-}
-
-// IncrCtx is the implementation of redis incr command.
-func (s *Redis) IncrCtx(ctx context.Context, key string) (val int64, err error) {
-	return s.client.Incr(ctx, key).Result()
-}
-
-// IncrBy is the implementation of redis incrby command.
-func (s *Redis) IncrBy(key string, increment int64) (int64, error) {
-	return s.IncrByCtx(s.ctx, key, increment)
-}
-
-// IncrByCtx is the implementation of redis incrby command.
-func (s *Redis) IncrByCtx(ctx context.Context, key string, increment int64) (val int64, err error) {
-	return s.client.IncrBy(ctx, key, increment).Result()
-}
-
-// IncrByFloat is the implementation of redis incrbyfloat command.
-func (s *Redis) IncrByFloat(key string, increment float64) (float64, error) {
-	return s.IncrByFloatCtx(s.ctx, key, increment)
-}
-
-// IncrByFloatCtx is the implementation of redis incrbyfloat command.
-func (s *Redis) IncrByFloatCtx(ctx context.Context, key string, increment float64) (val float64, err error) {
-	return s.client.IncrByFloat(ctx, key, increment).Result()
-}
-
-// Decr is the implementation of redis decr command.
-func (s *Redis) Decr(key string) (int64, error) {
-	return s.DecrCtx(s.ctx, key)
-}
-
-// DecrCtx is the implementation of redis decr command.
-func (s *Redis) DecrCtx(ctx context.Context, key string) (val int64, err error) {
-	return s.client.Decr(ctx, key).Result()
-}
-
-// DecrBy is the implementation of redis decrby command.
-func (s *Redis) DecrBy(key string, decrement int64) (int64, error) {
-	return s.DecrByCtx(s.ctx, key, decrement)
-}
-
-// DecrByCtx is the implementation of redis decrby command.
-func (s *Redis) DecrByCtx(ctx context.Context, key string, decrement int64) (val int64, err error) {
-	return s.client.DecrBy(ctx, key, decrement).Result()
-}
-
-// ------------------------
-
-// HDel is the implementation of redis hdel command.
-func (s *Redis) HDel(key string, fields ...string) (bool, error) {
-	return s.HDelCtx(s.ctx, key, fields...)
-}
-
-// HDelCtx is the implementation of redis hdel command.
-func (s *Redis) HDelCtx(ctx context.Context, key string, fields ...string) (val bool, err error) {
-	v, err := s.client.HDel(ctx, key, fields...).Result()
-	return v >= 1, err
-}
-
-// HExists is the implementation of redis hexists command.
-func (s *Redis) HExists(key, field string) (bool, error) {
-	return s.HExistsCtx(s.ctx, key, field)
-}
-
-// HExistsCtx is the implementation of redis hexists command.
-func (s *Redis) HExistsCtx(ctx context.Context, key, field string) (val bool, err error) {
-	return s.client.HExists(ctx, key, field).Result()
-}
-
-// HGet is the implementation of redis hget command.
-func (s *Redis) HGet(key, field string) (string, error) {
-	return s.HGetCtx(s.ctx, key, field)
-}
-
-// HGetCtx is the implementation of redis hget command.
-func (s *Redis) HGetCtx(ctx context.Context, key, field string) (val string, err error) {
-	return s.client.HGet(ctx, key, field).Result()
-}
-
-// HGetAll is the implementation of redis hgetall command.
-func (s *Redis) HGetAll(key string) (map[string]string, error) {
-	return s.HGetAllCtx(s.ctx, key)
-}
-
-// HGetAllCtx is the implementation of redis hgetall command.
-func (s *Redis) HGetAllCtx(ctx context.Context, key string) (val map[string]string, err error) {
-	return s.client.HGetAll(ctx, key).Result()
-}
-
-// HIncrBy is the implementation of redis hincrby command.
-func (s *Redis) HIncrBy(key, field string, increment int64) (int64, error) {
-	return s.HIncrByCtx(s.ctx, key, field, increment)
-}
-
-// HIncrByCtx is the implementation of redis hincrby command.
-func (s *Redis) HIncrByCtx(ctx context.Context, key, field string, increment int64) (val int64, err error) {
-	return s.client.HIncrBy(ctx, key, field, increment).Result()
-}
-
-// HIncrByFloat is the implementation of redis hincrbyfloat command.
-func (s *Redis) HIncrByFloat(key, field string, increment float64) (float64, error) {
-	return s.HIncrByFloatCtx(s.ctx, key, field, increment)
-}
-
-// HIncrByFloatCtx is the implementation of redis hincrbyfloat command.
-func (s *Redis) HIncrByFloatCtx(ctx context.Context, key, field string, increment float64) (val float64, err error) {
-	return s.client.HIncrByFloat(ctx, key, field, increment).Result()
-}
-
-// HKeys is the implementation of redis hkeys command.
-func (s *Redis) HKeys(key string) ([]string, error) {
-	return s.HKeysCtx(s.ctx, key)
-}
-
-// HKeysCtx is the implementation of redis hkeys command.
-func (s *Redis) HKeysCtx(ctx context.Context, key string) (val []string, err error) {
-	return s.client.HKeys(ctx, key).Result()
-}
-
-// HLen is the implementation of redis hlen command.
-func (s *Redis) HLen(key string) (int64, error) {
-	return s.HLenCtx(s.ctx, key)
-}
-
-// HLenCtx is the implementation of redis hlen command.
-func (s *Redis) HLenCtx(ctx context.Context, key string) (val int64, err error) {
-	return s.client.HLen(ctx, key).Result()
-}
-
-// HMGet is the implementation of redis hmget command.
-func (s *Redis) HMGet(key string, fields ...string) ([]string, error) {
-	return s.HMGetCtx(s.ctx, key, fields...)
-}
-
-// HMGetCtx is the implementation of redis hmget command.
-func (s *Redis) HMGetCtx(ctx context.Context, key string, fields ...string) (val []string, err error) {
-	v, err := s.client.HMGet(ctx, key, fields...).Result()
-	val = toStrings(v)
-	return
-}
-
-// HSet is the implementation of redis hset command.
-func (s *Redis) HSet(key, field, value string) error {
-	return s.HSetCtx(s.ctx, key, field, value)
-}
-
-// HSetCtx is the implementation of redis hset command.
-func (s *Redis) HSetCtx(ctx context.Context, key, field, value string) error {
-	return s.client.HSet(ctx, key, field, value).Err()
-}
-
-// HSetNX is the implementation of redis hsetnx command.
-func (s *Redis) HSetNX(key, field, value string) (bool, error) {
-	return s.HSetNXCtx(s.ctx, key, field, value)
-}
-
-// HSetNXCtx is the implementation of redis hsetnx command.
-func (s *Redis) HSetNXCtx(ctx context.Context, key, field, value string) (val bool, err error) {
-	return s.client.HSetNX(ctx, key, field, value).Result()
-}
-
-// HMSet is the implementation of redis hmset command.
-func (s *Redis) HMSet(key string, fieldsAndValues map[string]string) error {
-	return s.HMSetCtx(s.ctx, key, fieldsAndValues)
-}
-
-// HMSetCtx is the implementation of redis hmset command.
-func (s *Redis) HMSetCtx(ctx context.Context, key string, fieldsAndValues map[string]string) error {
-	vals := make(map[string]interface{}, len(fieldsAndValues))
-	for k, v := range fieldsAndValues {
-		vals[k] = v
-	}
-
-	return s.client.HMSet(ctx, key, vals).Err()
-}
-
-// HScan is the implementation of redis hscan command.
-func (s *Redis) HScan(key string, cursor uint64, match string, count int64) (
-	keys []string, cur uint64, err error) {
-	return s.HScanCtx(s.ctx, key, cursor, match, count)
-}
-
-// HScanCtx is the implementation of redis hscan command.
-func (s *Redis) HScanCtx(ctx context.Context, key string, cursor uint64, match string, count int64) (
-	keys []string, cur uint64, err error) {
-	keys, cur, err = s.client.HScan(ctx, key, cursor, match, count).Result()
-	return
-}
-
-// HVals is the implementation of redis hvals command.
-func (s *Redis) HVals(key string) ([]string, error) {
-	return s.HValsCtx(s.ctx, key)
-}
-
-// HValsCtx is the implementation of redis hvals command.
-func (s *Redis) HValsCtx(ctx context.Context, key string) (val []string, err error) {
-	val, err = s.client.HVals(ctx, key).Result()
-	return
-}
-
-// ------------------------
-
-// LLen is the implementation of redis llen command.
-func (s *Redis) LLen(key string) (int64, error) {
-	return s.LLenCtx(s.ctx, key)
-}
-
-// LLenCtx is the implementation of redis llen command.
-func (s *Redis) LLenCtx(ctx context.Context, key string) (val int64, err error) {
-	return s.client.LLen(ctx, key).Result()
-}
-
-// ------------------------
-
-// ------------------------
 
 // ------------------------
