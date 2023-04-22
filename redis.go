@@ -272,26 +272,6 @@ func (s *Redis) BitPosCtx(ctx context.Context, key string, bit, start, end int64
 
 // ------------------------
 
-// Decr is the implementation of redis decr command.
-func (s *Redis) Decr(key string) (int64, error) {
-	return s.DecrCtx(context.Background(), key)
-}
-
-// DecrCtx is the implementation of redis decr command.
-func (s *Redis) DecrCtx(ctx context.Context, key string) (val int64, err error) {
-	return s.client.Decr(ctx, key).Result()
-}
-
-// DecrBy is the implementation of redis decrby command.
-func (s *Redis) DecrBy(key string, decrement int64) (int64, error) {
-	return s.DecrByCtx(context.Background(), key, decrement)
-}
-
-// DecrByCtx is the implementation of redis decrby command.
-func (s *Redis) DecrByCtx(ctx context.Context, key string, decrement int64) (val int64, err error) {
-	return s.client.DecrBy(ctx, key, decrement).Result()
-}
-
 // Del deletes keys.
 func (s *Redis) Del(keys ...string) (int64, error) {
 	return s.DelCtx(context.Background(), keys...)
@@ -358,6 +338,16 @@ func (s *Redis) ExpireAt(key string, expireTime int64) error {
 // ExpireAtCtx is the implementation of redis expireat command.
 func (s *Redis) ExpireAtCtx(ctx context.Context, key string, expireTime int64) error {
 	return s.client.ExpireAt(ctx, key, time.Unix(expireTime, 0)).Err()
+}
+
+// Keys is the implementation of redis keys command.
+func (s *Redis) Keys(pattern string) ([]string, error) {
+	return s.KeysCtx(context.Background(), pattern)
+}
+
+// KeysCtx is the implementation of redis keys command.
+func (s *Redis) KeysCtx(ctx context.Context, pattern string) (val []string, err error) {
+	return s.client.Keys(ctx, pattern).Result()
 }
 
 // ------------------------
@@ -457,16 +447,6 @@ func (s *Redis) GetCtx(ctx context.Context, key string) (val string, err error) 
 	}
 }
 
-// GetBit is the implementation of redis getbit command.
-func (s *Redis) GetBit(key string, offset int64) (int64, error) {
-	return s.GetBitCtx(context.Background(), key, offset)
-}
-
-// GetBitCtx is the implementation of redis getbit command.
-func (s *Redis) GetBitCtx(ctx context.Context, key string, offset int64) (val int64, err error) {
-	return s.client.GetBit(ctx, key, offset).Result()
-}
-
 // GetSet is the implementation of redis getset command.
 func (s *Redis) GetSet(key, value string) (string, error) {
 	return s.GetSetCtx(context.Background(), key, value)
@@ -478,6 +458,66 @@ func (s *Redis) GetSetCtx(ctx context.Context, key, value string) (val string, e
 		return val, nil
 	}
 	return "", err
+}
+
+// GetBit is the implementation of redis getbit command.
+func (s *Redis) GetBit(key string, offset int64) (int64, error) {
+	return s.GetBitCtx(context.Background(), key, offset)
+}
+
+// GetBitCtx is the implementation of redis getbit command.
+func (s *Redis) GetBitCtx(ctx context.Context, key string, offset int64) (val int64, err error) {
+	return s.client.GetBit(ctx, key, offset).Result()
+}
+
+// Incr is the implementation of redis incr command.
+func (s *Redis) Incr(key string) (int64, error) {
+	return s.IncrCtx(context.Background(), key)
+}
+
+// IncrCtx is the implementation of redis incr command.
+func (s *Redis) IncrCtx(ctx context.Context, key string) (val int64, err error) {
+	return s.client.Incr(ctx, key).Result()
+}
+
+// IncrBy is the implementation of redis incrby command.
+func (s *Redis) IncrBy(key string, increment int64) (int64, error) {
+	return s.IncrByCtx(context.Background(), key, increment)
+}
+
+// IncrByCtx is the implementation of redis incrby command.
+func (s *Redis) IncrByCtx(ctx context.Context, key string, increment int64) (val int64, err error) {
+	return s.client.IncrBy(ctx, key, increment).Result()
+}
+
+// IncrByFloat is the implementation of redis incrbyfloat command.
+func (s *Redis) IncrByFloat(key string, increment float64) (float64, error) {
+	return s.IncrByFloatCtx(context.Background(), key, increment)
+}
+
+// IncrByFloatCtx is the implementation of redis incrbyfloat command.
+func (s *Redis) IncrByFloatCtx(ctx context.Context, key string, increment float64) (val float64, err error) {
+	return s.client.IncrByFloat(ctx, key, increment).Result()
+}
+
+// Decr is the implementation of redis decr command.
+func (s *Redis) Decr(key string) (int64, error) {
+	return s.DecrCtx(context.Background(), key)
+}
+
+// DecrCtx is the implementation of redis decr command.
+func (s *Redis) DecrCtx(ctx context.Context, key string) (val int64, err error) {
+	return s.client.Decr(ctx, key).Result()
+}
+
+// DecrBy is the implementation of redis decrby command.
+func (s *Redis) DecrBy(key string, decrement int64) (int64, error) {
+	return s.DecrByCtx(context.Background(), key, decrement)
+}
+
+// DecrByCtx is the implementation of redis decrby command.
+func (s *Redis) DecrByCtx(ctx context.Context, key string, decrement int64) (val int64, err error) {
+	return s.client.DecrBy(ctx, key, decrement).Result()
 }
 
 // ------------------------
@@ -635,6 +675,16 @@ func (s *Redis) HValsCtx(ctx context.Context, key string) (val []string, err err
 }
 
 // ------------------------
+
+// LLen is the implementation of redis llen command.
+func (s *Redis) LLen(key string) (int64, error) {
+	return s.LLenCtx(context.Background(), key)
+}
+
+// LLenCtx is the implementation of redis llen command.
+func (s *Redis) LLenCtx(ctx context.Context, key string) (val int64, err error) {
+	return s.client.LLen(ctx, key).Result()
+}
 
 // ------------------------
 
