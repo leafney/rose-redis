@@ -23,3 +23,13 @@ func (s *Redis) EvalShaCtx(ctx context.Context, sha string, keys []string,
 	args ...interface{}) (val interface{}, err error) {
 	return s.client.EvalSha(ctx, sha, keys, args...).Result()
 }
+
+// ScriptLoad is the implementation of redis script load command.
+func (s *Redis) ScriptLoad(script string) (string, error) {
+	return s.ScriptLoadCtx(context.Background(), script)
+}
+
+// ScriptLoadCtx is the implementation of redis script load command.
+func (s *Redis) ScriptLoadCtx(ctx context.Context, script string) (string, error) {
+	return s.client.ScriptLoad(ctx, script).Result()
+}

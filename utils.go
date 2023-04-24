@@ -2,6 +2,7 @@ package rredis
 
 import (
 	"fmt"
+	red "github.com/go-redis/redis/v8"
 	"reflect"
 	"strconv"
 	"strings"
@@ -103,4 +104,44 @@ func reprOfValue(val reflect.Value) string {
 	default:
 		return fmt.Sprint(val.Interface())
 	}
+}
+
+func toPairs(vals []red.Z) []Pair {
+	pairs := make([]Pair, len(vals))
+	for i, val := range vals {
+		switch member := val.Member.(type) {
+		case string:
+			pairs[i] = Pair{
+				Key:   member,
+				Score: int64(val.Score),
+			}
+		default:
+			pairs[i] = Pair{
+				Key:   Repr(val.Member),
+				Score: int64(val.Score),
+			}
+		}
+	}
+	return pairs
+}
+
+func toFloatPairs(vals []red.Z) []FloatPair {
+	pairs := make([]FloatPair, len(vals))
+
+	for i, val := range vals {
+		switch member := val.Member.(type) {
+		case string:
+			pairs[i] = FloatPair{
+				Key:   member,
+				Score: val.Score,
+			}
+		default:
+			pairs[i] = FloatPair{
+				Key:   Repr(val.Member),
+				Score: val.Score,
+			}
+		}
+	}
+
+	return pairs
 }

@@ -54,6 +54,16 @@ func (s *Redis) GetBitCtx(ctx context.Context, key string, offset int64) (val in
 	return s.client.GetBit(ctx, key, offset).Result()
 }
 
+// SetBit is the implementation of redis setbit command.
+func (s *Redis) SetBit(key string, offset int64, value int) (int64, error) {
+	return s.SetBitCtx(context.Background(), key, offset, value)
+}
+
+// SetBitCtx is the implementation of redis setbit command.
+func (s *Redis) SetBitCtx(ctx context.Context, key string, offset int64, value int) (val int64, err error) {
+	return s.client.SetBit(ctx, key, offset, value).Result()
+}
+
 // Incr is the implementation of redis incr command.
 func (s *Redis) Incr(key string) (int64, error) {
 	return s.IncrCtx(s.ctx, key)

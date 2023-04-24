@@ -28,6 +28,18 @@ const (
 )
 
 type (
+	// A Pair is a key/pair set used in redis zset.
+	Pair struct {
+		Key   string
+		Score int64
+	}
+
+	// A FloatPair is a key/pair for float set used in redis zet.
+	FloatPair struct {
+		Key   string
+		Score float64
+	}
+
 	Option struct {
 		isCluster bool
 		Type      RType
