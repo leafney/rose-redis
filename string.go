@@ -3,6 +3,7 @@ package rredis
 import (
 	"context"
 	red "github.com/go-redis/redis/v8"
+	"time"
 )
 
 // Set is the implementation of redis set command.
@@ -31,6 +32,9 @@ func (s *Redis) GetCtx(ctx context.Context, key string) (val string, err error) 
 	}
 }
 
+// TODO Getrange
+// TODO Setrange
+
 // GetSet is the implementation of redis getset command.
 func (s *Redis) GetSet(key, value string) (string, error) {
 	return s.GetSetCtx(s.ctx, key, value)
@@ -54,6 +58,18 @@ func (s *Redis) GetBitCtx(ctx context.Context, key string, offset int64) (val in
 	return s.client.GetBit(ctx, key, offset).Result()
 }
 
+// MGet is the implementation of redis mget command.
+func (s *Redis) MGet(keys ...string) ([]string, error) {
+	return s.MGetCtx(context.Background(), keys...)
+}
+
+// MGetCtx is the implementation of redis mget command.
+func (s *Redis) MGetCtx(ctx context.Context, keys ...string) (val []string, err error) {
+	v, err := s.client.MGet(ctx, keys...).Result()
+	val = toStrings(v)
+	return
+}
+
 // SetBit is the implementation of redis setbit command.
 func (s *Redis) SetBit(key string, offset int64, value int) (int64, error) {
 	return s.SetBitCtx(s.ctx, key, offset, value)
@@ -63,6 +79,38 @@ func (s *Redis) SetBit(key string, offset int64, value int) (int64, error) {
 func (s *Redis) SetBitCtx(ctx context.Context, key string, offset int64, value int) (val int64, err error) {
 	return s.client.SetBit(ctx, key, offset, value).Result()
 }
+
+// SetEx is the implementation of redis setex command.
+func (s *Redis) SetEx(key, value string, seconds int64) error {
+	return s.SetExCtx(context.Background(), key, value, seconds)
+}
+
+// SetExCtx is the implementation of redis setex command.
+func (s *Redis) SetExCtx(ctx context.Context, key, value string, seconds int64) error {
+	return s.client.Set(ctx, key, value, time.Duration(seconds)*time.Second).Err()
+}
+
+// SetNx is the implementation of redis setnx command.
+func (s *Redis) SetNx(key, value string) (bool, error) {
+	return s.SetNxCtx(context.Background(), key, value)
+}
+
+// SetNxCtx is the implementation of redis setnx command.
+func (s *Redis) SetNxCtx(ctx context.Context, key, value string) (val bool, err error) {
+	return s.client.SetNX(ctx, key, value, 0).Result()
+}
+
+// SetNxEx is the implementation of redis setnx command with expire.
+func (s *Redis) SetNxEx(key, value string, seconds int64) (bool, error) {
+	return s.SetNxExCtx(context.Background(), key, value, seconds)
+}
+
+// SetNxExCtx is the implementation of redis setnx command with expire.
+func (s *Redis) SetNxExCtx(ctx context.Context, key, value string, seconds int64) (val bool, err error) {
+	return s.client.SetNX(ctx, key, value, time.Duration(seconds)*time.Second).Result()
+}
+
+// TODO strlen
 
 // Incr is the implementation of redis incr command.
 func (s *Redis) Incr(key string) (int64, error) {
