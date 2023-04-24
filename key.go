@@ -73,7 +73,7 @@ func (s *Redis) PersistCtx(ctx context.Context, key string) (val bool, err error
 
 // TTL is the implementation of redis ttl command.
 func (s *Redis) TTL(key string) (int64, error) {
-	return s.TTLCtx(context.Background(), key)
+	return s.TTLCtx(s.ctx, key)
 }
 
 // TTLCtx is the implementation of redis ttl command.
@@ -88,7 +88,7 @@ func (s *Redis) TTLCtx(ctx context.Context, key string) (val int64, err error) {
 
 // Scan is the implementation of redis scan command.
 func (s *Redis) Scan(cursor uint64, match string, count int64) (keys []string, cur uint64, err error) {
-	return s.ScanCtx(context.Background(), cursor, match, count)
+	return s.ScanCtx(s.ctx, cursor, match, count)
 }
 
 // ScanCtx is the implementation of redis scan command.

@@ -27,6 +27,11 @@ const (
 	idleConns   = 8
 )
 
+var (
+	// ErrNilNode is an error that indicates a nil redis node.
+	ErrNilNode = errors.New("nil redis node")
+)
+
 type (
 	// A Pair is a key/pair set used in redis zset.
 	Pair struct {
@@ -51,6 +56,11 @@ type (
 	Redis struct {
 		client red.UniversalClient
 		ctx    context.Context
+	}
+
+	// RedisNode interface represents a redis node.
+	RedisNode interface {
+		red.Cmdable
 	}
 
 	// GeoLocation is used with GeoAdd to add geospatial location.
@@ -186,72 +196,5 @@ func (s *Redis) PingCtx(ctx context.Context) (val bool) {
 	val = v == "PONG"
 	return
 }
-
-// ------------------------
-
-//
-//// Blpop uses passed in redis connection to execute blocking queries.
-//// Doesn't benefit from pooling redis connections of blocking queries
-//func (s *Redis) Blpop(node RedisNode, key string) (string, error) {
-//	return s.BlpopCtx(s.ctx, node, key)
-//}
-//
-//// BlpopCtx uses passed in redis connection to execute blocking queries.
-//// Doesn't benefit from pooling redis connections of blocking queries
-//func (s *Redis) BlpopCtx(ctx context.Context, node RedisNode, key string) (string, error) {
-//	return s.BlpopWithTimeoutCtx(ctx, node, blockingQueryTimeout, key)
-//}
-//
-//// BlpopEx uses passed in redis connection to execute blpop command.
-//// The difference against Blpop is that this method returns a bool to indicate success.
-//func (s *Redis) BlpopEx(node RedisNode, key string) (string, bool, error) {
-//	return s.BlpopExCtx(s.ctx, node, key)
-//}
-//
-//// BlpopExCtx uses passed in redis connection to execute blpop command.
-//// The difference against Blpop is that this method returns a bool to indicate success.
-//func (s *Redis) BlpopExCtx(ctx context.Context, node RedisNode, key string) (string, bool, error) {
-//	if node == nil {
-//		return "", false, ErrNilNode
-//	}
-//
-//	vals, err := node.BLPop(ctx, blockingQueryTimeout, key).Result()
-//	if err != nil {
-//		return "", false, err
-//	}
-//
-//	if len(vals) < 2 {
-//		return "", false, fmt.Errorf("no value on key: %s", key)
-//	}
-//
-//	return vals[1], true, nil
-//}
-//
-//
-//// BlpopWithTimeout uses passed in redis connection to execute blpop command.
-//// Control blocking query timeout
-//func (s *Redis) BlpopWithTimeout(node RedisNode, timeout time.Duration, key string) (string, error) {
-//	return s.BlpopWithTimeoutCtx(s.ctx, node, timeout, key)
-//}
-//
-//// BlpopWithTimeoutCtx uses passed in redis connection to execute blpop command.
-//// Control blocking query timeout
-//func (s *Redis) BlpopWithTimeoutCtx(ctx context.Context, node RedisNode, timeout time.Duration,
-//	key string) (string, error) {
-//	if node == nil {
-//		return "", ErrNilNode
-//	}
-//
-//	vals, err := node.BLPop(ctx, timeout, key).Result()
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	if len(vals) < 2 {
-//		return "", fmt.Errorf("no value on key: %s", key)
-//	}
-//
-//	return vals[1], nil
-//}
 
 // ------------------------

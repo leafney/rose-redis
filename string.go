@@ -56,7 +56,7 @@ func (s *Redis) GetBitCtx(ctx context.Context, key string, offset int64) (val in
 
 // SetBit is the implementation of redis setbit command.
 func (s *Redis) SetBit(key string, offset int64, value int) (int64, error) {
-	return s.SetBitCtx(context.Background(), key, offset, value)
+	return s.SetBitCtx(s.ctx, key, offset, value)
 }
 
 // SetBitCtx is the implementation of redis setbit command.
