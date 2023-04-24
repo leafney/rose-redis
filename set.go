@@ -75,3 +75,84 @@ func (s *Redis) SInterStoreCtx(ctx context.Context, destination string, keys ...
 	val int64, err error) {
 	return s.client.SInterStore(ctx, destination, keys...).Result()
 }
+
+// SIsMember is the implementation of redis sismember command.
+func (s *Redis) SIsMember(key string, value interface{}) (bool, error) {
+	return s.SIsMemberCtx(context.Background(), key, value)
+}
+
+// SIsMemberCtx is the implementation of redis sismember command.
+func (s *Redis) SIsMemberCtx(ctx context.Context, key string, value interface{}) (val bool, err error) {
+	return s.client.SIsMember(ctx, key, value).Result()
+}
+
+// SMembers is the implementation of redis smembers command.
+func (s *Redis) SMembers(key string) ([]string, error) {
+	return s.SMembersCtx(context.Background(), key)
+}
+
+// SMembersCtx is the implementation of redis smembers command.
+func (s *Redis) SMembersCtx(ctx context.Context, key string) (val []string, err error) {
+	return s.client.SMembers(ctx, key).Result()
+}
+
+// SPop is the implementation of redis spop command.
+func (s *Redis) SPop(key string) (string, error) {
+	return s.SPopCtx(context.Background(), key)
+}
+
+// SPopCtx is the implementation of redis spop command.
+func (s *Redis) SPopCtx(ctx context.Context, key string) (val string, err error) {
+	return s.client.SPop(ctx, key).Result()
+}
+
+// SRandMember is the implementation of redis srandmember command.
+func (s *Redis) SRandMember(key string) (string, error) {
+	return s.SRandMemberCtx(context.Background(), key)
+}
+
+// SRandMemberCtx is the implementation of redis srandmember command.
+func (s *Redis) SRandMemberCtx(ctx context.Context, key string) (val string, err error) {
+	return s.client.SRandMember(ctx, key).Result()
+}
+
+// SRandMemberN is the implementation of redis SRandMemberN command.
+func (s *Redis) SRandMemberN(key string, count int64) ([]string, error) {
+	return s.SRandMemberNCtx(context.Background(), key, count)
+}
+
+// SRandMemberNCtx is the implementation of redis SRandMemberN command.
+func (s *Redis) SRandMemberNCtx(ctx context.Context, key string, count int64) (val []string, err error) {
+	return s.client.SRandMemberN(ctx, key, count).Result()
+}
+
+// SRem is the implementation of redis srem command.
+func (s *Redis) SRem(key string, values ...interface{}) (int64, error) {
+	return s.SRemCtx(context.Background(), key, values...)
+}
+
+// SRemCtx is the implementation of redis srem command.
+func (s *Redis) SRemCtx(ctx context.Context, key string, values ...interface{}) (val int64, err error) {
+	return s.client.SRem(ctx, key, values...).Result()
+}
+
+// SUnion is the implementation of redis sunion command.
+func (s *Redis) SUnion(keys ...string) ([]string, error) {
+	return s.SUnionCtx(context.Background(), keys...)
+}
+
+// SUnionCtx is the implementation of redis sunion command.
+func (s *Redis) SUnionCtx(ctx context.Context, keys ...string) (val []string, err error) {
+	return s.client.SUnion(ctx, keys...).Result()
+}
+
+// SUnionStore is the implementation of redis sunionstore command.
+func (s *Redis) SUnionStore(destination string, keys ...string) (int64, error) {
+	return s.SUnionStoreCtx(context.Background(), destination, keys...)
+}
+
+// SUnionStoreCtx is the implementation of redis sunionstore command.
+func (s *Redis) SUnionStoreCtx(ctx context.Context, destination string, keys ...string) (
+	val int64, err error) {
+	return s.client.SUnionStore(ctx, destination, keys...).Result()
+}

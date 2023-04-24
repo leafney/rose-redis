@@ -19,5 +19,5 @@ func TestNewRedis(t *testing.T) {
 	defer client.Close()
 
 	client.Set("abcdef", "hello")
-	
+
 }
