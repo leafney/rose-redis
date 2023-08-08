@@ -19,6 +19,10 @@ func TestNewRedis(t *testing.T) {
 	}
 	defer client.Close()
 
-	client.Set("abcdef", "hello")
+	//client.Set("abcdef", "hello")
+
+	//client.GetWithCache("",10,100, func() (interface{}, error) {
+	//
+	//})
 
 }
