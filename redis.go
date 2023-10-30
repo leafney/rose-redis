@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	red "github.com/go-redis/redis/v8"
 	"time"
 )
@@ -48,7 +49,7 @@ type (
 	Option struct {
 		isCluster bool
 		Type      RType
-		Pwd       string
+		Pass      string
 		Db        int
 		Tls       bool
 	}
@@ -86,6 +87,17 @@ type (
 	StringCmd = red.StringCmd
 )
 
+// MustNewRedis returns a Redis with given options.
+func MustNewRedis(addr string, opts *Option) *Redis {
+	rds, err := NewRedis(addr, opts)
+	if err != nil {
+		msg := fmt.Sprintf("%+v\n\n", err.Error())
+		panic(msg)
+	}
+
+	return rds
+}
+
 func NewRedis(addr string, opt *Option) (*Redis, error) {
 	rdc := loadOption(opt)
 	r := new(Redis)
@@ -100,7 +112,7 @@ func NewRedis(addr string, opt *Option) (*Redis, error) {
 
 		options := &red.ClusterOptions{
 			Addrs:        splitClusterAddr(addr),
-			Password:     rdc.Pwd,
+			Password:     rdc.Pass,
 			TLSConfig:    tlsConfig,
 			MaxRetries:   maxRetries,
 			MinIdleConns: idleConns,
@@ -111,7 +123,7 @@ func NewRedis(addr string, opt *Option) (*Redis, error) {
 	} else {
 		options := &red.Options{
 			Addr:         addr,
-			Password:     rdc.Pwd,
+			Password:     rdc.Pass,
 			DB:           rdc.Db,
 			MaxRetries:   maxRetries,
 			MinIdleConns: idleConns,
@@ -132,7 +144,7 @@ func NewRedis(addr string, opt *Option) (*Redis, error) {
 //	Addr: addr,
 //	Type: TypeNode,
 //	Db:   defDatabase,
-//	Pwd:  "",
+//	Pass:  "",
 //}
 //
 //// load user configuration
@@ -152,7 +164,7 @@ func loadOption(opt *Option) *Option {
 		Type:      TypeNode,
 		Db:        defDatabase,
 		isCluster: false,
-		Pwd:       "",
+		Pass:      "",
 		Tls:       false,
 	}
 
@@ -162,8 +174,8 @@ func loadOption(opt *Option) *Option {
 	if opt.Db > 0 {
 		o.Db = opt.Db
 	}
-	if len(opt.Pwd) > 0 {
-		o.Pwd = opt.Pwd
+	if len(opt.Pass) > 0 {
+		o.Pass = opt.Pass
 	}
 	o.isCluster = opt.Type == TypeCluster
 	o.Tls = opt.Tls
