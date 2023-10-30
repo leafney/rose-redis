@@ -1,5 +1,9 @@
 # rose-redis
 
+## Introduce
+
+Derived from the built-in `redis` methods in `go-zero` project, we have enhanced and optimized operations on `redis`.
+
 ## Install
 
 ```
