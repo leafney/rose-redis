@@ -201,6 +201,8 @@ func (s *Redis) ZRemRangeByRankCtx(ctx context.Context, key string, start, stop 
 
 // TODO Zremrangebylex
 
+// --------
+
 // ZRange is the implementation of redis zrange command.
 func (s *Redis) ZRange(key string, start, stop int64) ([]string, error) {
 	return s.ZRangeCtx(s.ctx, key, start, stop)
@@ -227,6 +229,21 @@ func (s *Redis) ZRangeByScoreCtx(ctx context.Context, key string, min, max strin
 	return
 }
 
+// ZRangeByScoreAll is the implementation of redis zrangebyscore command.
+func (s *Redis) ZRangeByScoreAll(key string) ([]string, error) {
+	return s.ZRangeByScoreAllCtx(s.ctx, key)
+}
+
+// ZRangeByScoreAllCtx is the implementation of redis zrangebyscore command.
+func (s *Redis) ZRangeByScoreAllCtx(ctx context.Context, key string) (
+	val []string, err error) {
+	val, err = s.client.ZRangeByScore(ctx, key, &red.ZRangeBy{
+		Min: "-inf",
+		Max: "+inf",
+	}).Result()
+	return
+}
+
 // ZRangeByScoreAndLimit is the implementation of redis zrangebyscore command.
 func (s *Redis) ZRangeByScoreAndLimit(key string, min, max string, page, size int64) ([]string, error) {
 	return s.ZRangeByScoreAndLimitCtx(s.ctx, key, min, max, page, size)
@@ -244,13 +261,13 @@ func (s *Redis) ZRangeByScoreAndLimitCtx(ctx context.Context, key string, min, m
 	return
 }
 
-// ZRangeByScoreAllLimit is the implementation of redis zrangebyscore command.
-func (s *Redis) ZRangeByScoreAllLimit(key string, page, size int64) ([]string, error) {
-	return s.ZRangeByScoreAllLimitCtx(s.ctx, key, page, size)
+// ZRangeByScoreAllAndLimit is the implementation of redis zrangebyscore command.
+func (s *Redis) ZRangeByScoreAllAndLimit(key string, page, size int64) ([]string, error) {
+	return s.ZRangeByScoreAllAndLimitCtx(s.ctx, key, page, size)
 }
 
-// ZRangeByScoreAllLimitCtx is the implementation of redis zrangebyscore command.
-func (s *Redis) ZRangeByScoreAllLimitCtx(ctx context.Context, key string, page, size int64) (
+// ZRangeByScoreAllAndLimitCtx is the implementation of redis zrangebyscore command.
+func (s *Redis) ZRangeByScoreAllAndLimitCtx(ctx context.Context, key string, page, size int64) (
 	val []string, err error) {
 	val, err = s.client.ZRangeByScore(ctx, key, &red.ZRangeBy{
 		Min:    "-inf",
@@ -290,12 +307,44 @@ func (s *Redis) ZRangeWithScoresFloatCtx(ctx context.Context, key string, start,
 // TODO Zrangebylex
 
 // ZRangeByScoreWithScores is the implementation of redis zrangebyscore command with scores.
-func (s *Redis) ZRangeByScoreWithScores(key string, start, stop int64) ([]Pair, error) {
-	return s.ZRangeByScoreWithScoresCtx(s.ctx, key, start, stop)
+func (s *Redis) ZRangeByScoreWithScores(key string, min, max string) ([]Pair, error) {
+	return s.ZRangeByScoreWithScoresCtx(s.ctx, key, min, max)
 }
 
 // ZRangeByScoreWithScoresCtx is the implementation of redis zrangebyscore command with scores.
-func (s *Redis) ZRangeByScoreWithScoresCtx(ctx context.Context, key string, start, stop int64) (
+func (s *Redis) ZRangeByScoreWithScoresCtx(ctx context.Context, key string, min, max string) (
+	val []Pair, err error) {
+	v, err := s.client.ZRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
+		Min: min,
+		Max: max,
+	}).Result()
+	val = toPairs(v)
+	return
+}
+
+// ZRangeByScoreWithScoresAll is the implementation of redis zrangebyscore command with scores.
+func (s *Redis) ZRangeByScoreWithScoresAll(key string) ([]Pair, error) {
+	return s.ZRangeByScoreWithScoresAllCtx(s.ctx, key)
+}
+
+// ZRangeByScoreWithScoresAllCtx is the implementation of redis zrangebyscore command with scores.
+func (s *Redis) ZRangeByScoreWithScoresAllCtx(ctx context.Context, key string) (
+	val []Pair, err error) {
+	v, err := s.client.ZRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
+		Min: "-inf",
+		Max: "+inf",
+	}).Result()
+	val = toPairs(v)
+	return
+}
+
+// ZRangeByScoreWithScoresInt64 is the implementation of redis zrangebyscore command with scores.
+func (s *Redis) ZRangeByScoreWithScoresInt64(key string, start, stop int64) ([]Pair, error) {
+	return s.ZRangeByScoreWithScoresInt64Ctx(s.ctx, key, start, stop)
+}
+
+// ZRangeByScoreWithScoresInt64Ctx is the implementation of redis zrangebyscore command with scores.
+func (s *Redis) ZRangeByScoreWithScoresInt64Ctx(ctx context.Context, key string, start, stop int64) (
 	val []Pair, err error) {
 	v, err := s.client.ZRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
 		Min: strconv.FormatInt(start, 10),
@@ -323,14 +372,52 @@ func (s *Redis) ZRangeByScoreWithScoresFloatCtx(ctx context.Context, key string,
 
 // ZRangeByScoreWithScoresAndLimit is the implementation of redis zrangebyscore command
 // with scores and limit.
-func (s *Redis) ZRangeByScoreWithScoresAndLimit(key string, start, stop int64,
-	page, size int64) ([]Pair, error) {
-	return s.ZRangeByScoreWithScoresAndLimitCtx(s.ctx, key, start, stop, page, size)
+func (s *Redis) ZRangeByScoreWithScoresAndLimit(key string, min, max string, page, size int64) ([]Pair, error) {
+	return s.ZRangeByScoreWithScoresAndLimitCtx(s.ctx, key, min, max, page, size)
 }
 
 // ZRangeByScoreWithScoresAndLimitCtx is the implementation of redis zrangebyscore command
 // with scores and limit.
-func (s *Redis) ZRangeByScoreWithScoresAndLimitCtx(ctx context.Context, key string, start,
+func (s *Redis) ZRangeByScoreWithScoresAndLimitCtx(ctx context.Context, key string, min, max string, page, size int64) (val []Pair, err error) {
+	v, err := s.client.ZRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
+		Min:    min,
+		Max:    max,
+		Offset: page * size,
+		Count:  size,
+	}).Result()
+	val = toPairs(v)
+	return
+}
+
+// ZRangeByScoreWithScoresAllAndLimit is the implementation of redis zrangebyscore command
+// with scores and limit.
+func (s *Redis) ZRangeByScoreWithScoresAllAndLimit(key string, page, size int64) ([]Pair, error) {
+	return s.ZRangeByScoreWithScoresAllAndLimitCtx(s.ctx, key, page, size)
+}
+
+// ZRangeByScoreWithScoresAllAndLimitCtx is the implementation of redis zrangebyscore command
+// with scores and limit.
+func (s *Redis) ZRangeByScoreWithScoresAllAndLimitCtx(ctx context.Context, key string, page, size int64) (val []Pair, err error) {
+	v, err := s.client.ZRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
+		Min:    "-inf",
+		Max:    "+inf",
+		Offset: page * size,
+		Count:  size,
+	}).Result()
+	val = toPairs(v)
+	return
+}
+
+// ZRangeByScoreWithScoresInt64AndLimit is the implementation of redis zrangebyscore command
+// with scores and limit.
+func (s *Redis) ZRangeByScoreWithScoresInt64AndLimit(key string, start, stop int64,
+	page, size int64) ([]Pair, error) {
+	return s.ZRangeByScoreWithScoresInt64AndLimitCtx(s.ctx, key, start, stop, page, size)
+}
+
+// ZRangeByScoreWithScoresInt64AndLimitCtx is the implementation of redis zrangebyscore command
+// with scores and limit.
+func (s *Redis) ZRangeByScoreWithScoresInt64AndLimitCtx(ctx context.Context, key string, start,
 	stop int64, page, size int64) (val []Pair, err error) {
 	v, err := s.client.ZRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
 		Min:    strconv.FormatInt(start, 10),
@@ -342,17 +429,16 @@ func (s *Redis) ZRangeByScoreWithScoresAndLimitCtx(ctx context.Context, key stri
 	return
 }
 
-// ZRangeByScoreWithScoresAndLimitFloat is the implementation of redis zrangebyscore command
+// ZRangeByScoreWithScoresFloatAndLimit is the implementation of redis zrangebyscore command
 // with scores by float and limit.
-func (s *Redis) ZRangeByScoreWithScoresAndLimitFloat(key string, start, stop float64,
+func (s *Redis) ZRangeByScoreWithScoresFloatAndLimit(key string, start, stop float64,
 	page, size int64) ([]FloatPair, error) {
-	return s.ZRangeByScoreWithScoresAndLimitFloatCtx(s.ctx,
-		key, start, stop, page, size)
+	return s.ZRangeByScoreWithScoresFloatAndLimitCtx(s.ctx, key, start, stop, page, size)
 }
 
-// ZRangeByScoreWithScoresAndLimitFloatCtx is the implementation of redis zrangebyscore command
+// ZRangeByScoreWithScoresFloatAndLimitCtx is the implementation of redis zrangebyscore command
 // with scores by float and limit.
-func (s *Redis) ZRangeByScoreWithScoresAndLimitFloatCtx(ctx context.Context, key string, start,
+func (s *Redis) ZRangeByScoreWithScoresFloatAndLimitCtx(ctx context.Context, key string, start,
 	stop float64, page, size int64) (val []FloatPair, err error) {
 	v, err := s.client.ZRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
 		Min:    strconv.FormatFloat(start, 'f', -1, 64),
@@ -364,22 +450,21 @@ func (s *Redis) ZRangeByScoreWithScoresAndLimitFloatCtx(ctx context.Context, key
 	return
 }
 
-// ZRangeByScoreWithScoresAllLimit is the implementation of redis zrevrangebyscore command
+// ZRangeByScoreWithScoresInt64AllLimit is the implementation of redis ZRangeByScoreWithScores command
 // with scores and limit.
-func (s *Redis) ZRangeByScoreWithScoresAllLimit(key string, start, stop int64,
+func (s *Redis) ZRangeByScoreWithScoresInt64AllLimit(key string, start, stop int64,
 	page, size int64) ([]Pair, error) {
-	return s.ZRangeByScoreWithScoresAllLimitCtx(s.ctx,
-		key, page, size)
+	return s.ZRangeByScoreWithScoresInt64AllLimitCtx(s.ctx, key, start, stop, page, size)
 }
 
-// ZRangeByScoreWithScoresAllLimitCtx is the implementation of redis zrevrangebyscore command
+// ZRangeByScoreWithScoresInt64AllLimitCtx is the implementation of redis ZRangeByScoreWithScores command
 // with scores and limit.
-func (s *Redis) ZRangeByScoreWithScoresAllLimitCtx(ctx context.Context, key string,
+func (s *Redis) ZRangeByScoreWithScoresInt64AllLimitCtx(ctx context.Context, key string, start, stop int64,
 	page, size int64) (val []Pair, err error) {
 
 	v, err := s.client.ZRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
-		Min:    "-inf",
-		Max:    "+inf",
+		Min:    strconv.FormatInt(start, 10),
+		Max:    strconv.FormatInt(stop, 10),
 		Offset: page * size,
 		Count:  size,
 	}).Result()
@@ -387,28 +472,26 @@ func (s *Redis) ZRangeByScoreWithScoresAllLimitCtx(ctx context.Context, key stri
 	return
 }
 
-// ZRangeByScoreWithScoresAllLimitFloat is the implementation of redis zrevrangebyscore command
+// ZRangeByScoreWithScoresFloatAllLimit is the implementation of redis ZRangeByScoreWithScores command
 // with scores by float and limit.
-func (s *Redis) ZRangeByScoreWithScoresAllLimitFloat(key string, start, stop float64,
-	page, size int64) ([]FloatPair, error) {
-	return s.ZRangeByScoreWithScoresAllLimitFloatCtx(s.ctx,
-		key, page, size)
+func (s *Redis) ZRangeByScoreWithScoresFloatAllLimit(key string, start, stop float64, page, size int64) ([]FloatPair, error) {
+	return s.ZRangeByScoreWithScoresFloatAllLimitCtx(s.ctx, key, start, stop, page, size)
 }
 
-// ZRangeByScoreWithScoresAllLimitFloatCtx is the implementation of redis zrevrangebyscore command
+// ZRangeByScoreWithScoresFloatAllLimitCtx is the implementation of redis ZRangeByScoreWithScores command
 // with scores by float and limit.
-func (s *Redis) ZRangeByScoreWithScoresAllLimitFloatCtx(ctx context.Context, key string,
-	page, size int64) (val []FloatPair, err error) {
-
+func (s *Redis) ZRangeByScoreWithScoresFloatAllLimitCtx(ctx context.Context, key string, start, stop float64, page, size int64) (val []FloatPair, err error) {
 	v, err := s.client.ZRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
-		Min:    "-inf",
-		Max:    "+inf",
+		Min:    strconv.FormatFloat(start, 'f', -1, 64),
+		Max:    strconv.FormatFloat(stop, 'f', -1, 64),
 		Offset: page * size,
 		Count:  size,
 	}).Result()
 	val = toFloatPairs(v)
 	return
 }
+
+// ------------
 
 // ZRevRange is the implementation of redis zrevrange command.
 func (s *Redis) ZRevRange(key string, start, stop int64) ([]string, error) {
@@ -436,6 +519,21 @@ func (s *Redis) ZRevRangeByScoreCtx(ctx context.Context, key string, min, max st
 	return
 }
 
+// ZRevRangeByScoreAll is the implementation of redis zrevrangebyscore command.
+func (s *Redis) ZRevRangeByScoreAll(key string) ([]string, error) {
+	return s.ZRevRangeByScoreAllCtx(s.ctx, key)
+}
+
+// ZRevRangeByScoreAllCtx is the implementation of redis zrevrangebyscore command.
+func (s *Redis) ZRevRangeByScoreAllCtx(ctx context.Context, key string) (
+	val []string, err error) {
+	val, err = s.client.ZRevRangeByScore(ctx, key, &red.ZRangeBy{
+		Min: "-inf",
+		Max: "+inf",
+	}).Result()
+	return
+}
+
 // ZRevRangeByScoreAndLimit is the implementation of redis zrevrangebyscore command.
 func (s *Redis) ZRevRangeByScoreAndLimit(key string, min, max string, page, size int64) ([]string, error) {
 	return s.ZRevRangeByScoreAndLimitCtx(s.ctx, key, min, max, page, size)
@@ -453,13 +551,13 @@ func (s *Redis) ZRevRangeByScoreAndLimitCtx(ctx context.Context, key string, min
 	return
 }
 
-// ZRevRangeByScoreAllLimit is the implementation of redis zrevrangebyscore command.
-func (s *Redis) ZRevRangeByScoreAllLimit(key string, page, size int64) ([]string, error) {
-	return s.ZRevRangeByScoreAllLimitCtx(s.ctx, key, page, size)
+// ZRevRangeByScoreAllAndLimit is the implementation of redis zrevrangebyscore command.
+func (s *Redis) ZRevRangeByScoreAllAndLimit(key string, page, size int64) ([]string, error) {
+	return s.ZRevRangeByScoreAllAndLimitCtx(s.ctx, key, page, size)
 }
 
-// ZRevRangeByScoreAllLimitCtx is the implementation of redis zrevrangebyscore command.
-func (s *Redis) ZRevRangeByScoreAllLimitCtx(ctx context.Context, key string, page, size int64) (
+// ZRevRangeByScoreAllAndLimitCtx is the implementation of redis zrevrangebyscore command.
+func (s *Redis) ZRevRangeByScoreAllAndLimitCtx(ctx context.Context, key string, page, size int64) (
 	val []string, err error) {
 	val, err = s.client.ZRangeByScore(ctx, key, &red.ZRangeBy{
 		Min:    "-inf",
@@ -481,6 +579,22 @@ func (s *Redis) ZRevRangeByScoreWithScoresCtx(ctx context.Context, key string, m
 	v, err := s.client.ZRevRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
 		Min: min,
 		Max: max,
+	}).Result()
+	val = toPairs(v)
+	return
+}
+
+// ZRevRangeByScoreWithScoresAll is the implementation of redis zrevrangebyscore command with scores.
+func (s *Redis) ZRevRangeByScoreWithScoresAll(key string) ([]Pair, error) {
+	return s.ZRevRangeByScoreWithScoresAllCtx(s.ctx, key)
+}
+
+// ZRevRangeByScoreWithScoresAllCtx is the implementation of redis zrevrangebyscore command with scores.
+func (s *Redis) ZRevRangeByScoreWithScoresAllCtx(ctx context.Context, key string) (
+	val []Pair, err error) {
+	v, err := s.client.ZRevRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
+		Min: "-inf",
+		Max: "+inf",
 	}).Result()
 	val = toPairs(v)
 	return
@@ -519,7 +633,7 @@ func (s *Redis) ZRevRangeByScoreWithScoresFloatCtx(ctx context.Context, key stri
 	return
 }
 
-// ZRevRangeByScoreWithScoresInt64AndLimit is the implementation of redis zrevrangebyscore command
+// ZRevRangeByScoreWithScoresAndLimit is the implementation of redis zrevrangebyscore command
 // with scores and limit.
 func (s *Redis) ZRevRangeByScoreWithScoresAndLimit(key string, min, max string,
 	page, size int64) ([]Pair, error) {
@@ -534,6 +648,28 @@ func (s *Redis) ZRevRangeByScoreWithScoresAndLimitCtx(ctx context.Context, key s
 	v, err := s.client.ZRevRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
 		Min:    min,
 		Max:    max,
+		Offset: page * size,
+		Count:  size,
+	}).Result()
+	val = toPairs(v)
+	return
+}
+
+// ZRevRangeByScoreWithScoresAllAndLimit is the implementation of redis zrevrangebyscore command
+// with scores and limit.
+func (s *Redis) ZRevRangeByScoreWithScoresAllAndLimit(key string,
+	page, size int64) ([]Pair, error) {
+	return s.ZRevRangeByScoreWithScoresAllAndLimitCtx(s.ctx, key, page, size)
+}
+
+// ZRevRangeByScoreWithScoresAllAndLimitCtx is the implementation of redis zrevrangebyscore command
+// with scores and limit.
+func (s *Redis) ZRevRangeByScoreWithScoresAllAndLimitCtx(ctx context.Context, key string,
+	page, size int64) (val []Pair, err error) {
+
+	v, err := s.client.ZRevRangeByScoreWithScores(ctx, key, &red.ZRangeBy{
+		Min:    "-inf",
+		Max:    "+inf",
 		Offset: page * size,
 		Count:  size,
 	}).Result()
@@ -628,6 +764,8 @@ func (s *Redis) ZRevRangeByScoreWithScoresFloatAllLimitCtx(ctx context.Context, 
 	val = toFloatPairs(v)
 	return
 }
+
+// ---------
 
 // ZUnionStore is the implementation of redis zunionstore command.
 func (s *Redis) ZUnionStore(dest string, store *ZStore) (int64, error) {
