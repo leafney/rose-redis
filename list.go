@@ -2,21 +2,11 @@ package rredis
 
 import (
 	"context"
+	"fmt"
+	"time"
 )
 
 /*
-// Blpop uses passed in redis connection to execute blocking queries.
-// Doesn't benefit from pooling redis connections of blocking queries
-func (s *Redis) Blpop(node RedisNode, key string) (string, error) {
-	return s.BlpopCtx(s.ctx, node, key)
-}
-
-// BlpopCtx uses passed in redis connection to execute blocking queries.
-// Doesn't benefit from pooling redis connections of blocking queries
-func (s *Redis) BlpopCtx(ctx context.Context, node RedisNode, key string) (string, error) {
-	return s.BlpopWithTimeoutCtx(ctx, node, blockingQueryTimeout, key)
-}
-
 // BlpopEx uses passed in redis connection to execute blpop command.
 // The difference against Blpop is that this method returns a bool to indicate success.
 func (s *Redis) BlpopEx(node RedisNode, key string) (string, bool, error) {
@@ -42,33 +32,75 @@ func (s *Redis) BlpopExCtx(ctx context.Context, node RedisNode, key string) (str
 	return vals[1], true, nil
 }
 
-// BlpopWithTimeout uses passed in redis connection to execute blpop command.
-// Control blocking query timeout
-func (s *Redis) BlpopWithTimeout(node RedisNode, timeout time.Duration, key string) (string, error) {
-	return s.BlpopWithTimeoutCtx(s.ctx, node, timeout, key)
+*/
+
+// BLPop Execute blocking queries with default timeout 5 seconds
+func (s *Redis) BLPop(key string) (string, error) {
+	return s.BLPopCtx(s.ctx, key)
 }
 
-// BlpopWithTimeoutCtx uses passed in redis connection to execute blpop command.
-// Control blocking query timeout
-func (s *Redis) BlpopWithTimeoutCtx(ctx context.Context, node RedisNode, timeout time.Duration,
-	key string) (string, error) {
-	if node == nil {
-		return "", ErrNilNode
-	}
+// BLPopCtx Execute blocking queries with default timeout 5 seconds
+func (s *Redis) BLPopCtx(ctx context.Context, key string) (string, error) {
+	return s.BLPopWithTimeoutCtx(ctx, blockingQueryTimeout, key)
+}
 
-	vals, err := node.BLPop(ctx, timeout, key).Result()
+// BLPopWithTimeout Execute blocking queries with timeout
+func (s *Redis) BLPopWithTimeout(timeout time.Duration, keys ...string) (string, error) {
+	return s.BLPopWithTimeoutCtx(s.ctx, timeout, keys...)
+}
+
+// BLPopWithTimeoutCtx Execute blocking queries with timeout
+func (s *Redis) BLPopWithTimeoutCtx(ctx context.Context, timeout time.Duration, keys ...string) (string, error) {
+	val, err := s.client.BLPop(ctx, timeout, keys...).Result()
 	if err != nil {
 		return "", err
 	}
 
-	if len(vals) < 2 {
-		return "", fmt.Errorf("no value on key: %s", key)
+	if len(val) < 2 {
+		return "", fmt.Errorf("no value on key: %v", keys)
 	}
 
-	return vals[1], nil
+	return val[1], nil
 }
 
-*/
+// BRPop Execute blocking queries with default timeout 5 seconds
+func (s *Redis) BRPop(key string) (string, error) {
+	return s.BRPopCtx(s.ctx, key)
+}
+
+// BRPopCtx Execute blocking queries with default timeout 5 seconds
+func (s *Redis) BRPopCtx(ctx context.Context, key string) (string, error) {
+	return s.BRPopWithTimeoutCtx(ctx, blockingQueryTimeout, key)
+}
+
+// BRPopWithTimeout Execute blocking queries with timeout
+func (s *Redis) BRPopWithTimeout(timeout time.Duration, keys ...string) (string, error) {
+	return s.BRPopWithTimeoutCtx(s.ctx, timeout, keys...)
+}
+
+// BRPopWithTimeoutCtx Execute blocking queries with timeout
+func (s *Redis) BRPopWithTimeoutCtx(ctx context.Context, timeout time.Duration, keys ...string) (string, error) {
+	val, err := s.client.BRPop(ctx, timeout, keys...).Result()
+	if err != nil {
+		return "", err
+	}
+
+	if len(val) < 2 {
+		return "", fmt.Errorf("no value on key: %v", keys)
+	}
+
+	return val[1], nil
+}
+
+// BRPopLPush
+func (s *Redis) BRPopLPush(sourceKey string, destKey string, timeout time.Duration) (string, error) {
+	return s.client.BRPopLPush(s.ctx, sourceKey, destKey, timeout).Result()
+}
+
+// BRPopLPushCtx
+func (s *Redis) BRPopLPushCtx(ctx context.Context, sourceKey string, destKey string, timeout time.Duration) (string, error) {
+	return s.client.BRPopLPush(ctx, sourceKey, destKey, timeout).Result()
+}
 
 // LIndex is the implementation of redis lindex command.
 func (s *Redis) LIndex(key string, index int64) (string, error) {
