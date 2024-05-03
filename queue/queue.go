@@ -36,9 +36,9 @@ func (s *SQueue) Publish(ctx context.Context, topic string, msg map[string]inter
 	return err
 }
 
-//func (s *SQueue) SetMaxCount(ctx context.Context, topic string, max int64) error {
-//	return s.client.XTrimMaxLenApprox(ctx, topic, max, 0)
-//}
+func (s *SQueue) SetMaxCount(ctx context.Context, topic string, max int64) error {
+	return s.client.XTrimMaxLenApprox(ctx, topic, max, 0)
+}
 
 func (s *SQueue) Count(ctx context.Context, topic string) int64 {
 	res, err := s.client.XLen(ctx, topic)
