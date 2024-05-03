@@ -64,7 +64,7 @@ type MsgInfo struct {
 	MsgId    string
 }
 
-type ConsumeMsgHandler func(info *MsgInfo, msg *map[string]interface{}) error
+type ConsumeMsgHandler func(info *MsgInfo, msg map[string]interface{}) error
 
 func (s *SQueue) Consume(ctx context.Context, topic, group, consumer string, batchSize int, handler ConsumeMsgHandler) error {
 	// start 用于创建消费者组的时候指定起始消费ID，0表示从头开始消费，$表示从最后一条消息开始消费
@@ -109,7 +109,7 @@ func (s *SQueue) consume(ctx context.Context, topic, group, consumer, id string,
 				Group:    group,
 				Consumer: consumer,
 				MsgId:    msg.ID,
-			}, &msg.Values)
+			}, msg.Values)
 			if err == nil {
 				if err := s.client.XAck(ctx, topic, group, msg.ID); err != nil {
 					return err

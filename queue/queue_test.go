@@ -48,7 +48,7 @@ func TestNewSQueue(t *testing.T) {
 	select {}
 }
 
-func consumeMsg(info *MsgInfo, msg *map[string]interface{}) error {
+func consumeMsg(info *MsgInfo, msg map[string]interface{}) error {
 
 	fmt.Println(info)
 	fmt.Println("接收到 ", msg)
