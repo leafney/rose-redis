@@ -2,7 +2,7 @@ package rredis
 
 import (
 	"context"
-	red "github.com/go-redis/redis/v8"
+	red "github.com/redis/go-redis/v9"
 )
 
 // BitCount is redis bitcount command implementation.

@@ -10,7 +10,7 @@ package rredis
 
 import (
 	"context"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 func (s *Redis) XAdd(ctx context.Context, a *redis.XAddArgs) (string, error) {

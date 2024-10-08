@@ -11,8 +11,8 @@ package queue
 import (
 	"context"
 	"fmt"
-	"github.com/go-redis/redis/v8"
 	rredis "github.com/leafney/rose-redis"
+	"github.com/redis/go-redis/v9"
 	"strings"
 )
 

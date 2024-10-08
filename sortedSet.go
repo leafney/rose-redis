@@ -2,7 +2,7 @@ package rredis
 
 import (
 	"context"
-	red "github.com/go-redis/redis/v8"
+	red "github.com/redis/go-redis/v9"
 	"strconv"
 )
 
@@ -25,7 +25,7 @@ func (s *Redis) ZAddFloat(key string, score float64, value string) (bool, error)
 // ZAddFloatCtx is the implementation of redis zadd command.
 func (s *Redis) ZAddFloatCtx(ctx context.Context, key string, score float64, value string) (
 	val bool, err error) {
-	v, err := s.client.ZAdd(ctx, key, &red.Z{
+	v, err := s.client.ZAdd(ctx, key, red.Z{
 		Score:  score,
 		Member: value,
 	}).Result()
@@ -41,9 +41,9 @@ func (s *Redis) ZAdds(key string, ps ...Pair) (int64, error) {
 
 // ZAddsCtx is the implementation of redis zadds command.
 func (s *Redis) ZAddsCtx(ctx context.Context, key string, ps ...Pair) (val int64, err error) {
-	var zs []*red.Z
+	zs := make([]red.Z, 0)
 	for _, p := range ps {
-		z := &red.Z{Score: float64(p.Score), Member: p.Key}
+		z := red.Z{Score: float64(p.Score), Member: p.Key}
 		zs = append(zs, z)
 	}
 

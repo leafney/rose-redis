@@ -2,7 +2,7 @@ package rredis
 
 import (
 	"fmt"
-	red "github.com/go-redis/redis/v8"
+	red "github.com/redis/go-redis/v9"
 	"reflect"
 	"strconv"
 	"strings"

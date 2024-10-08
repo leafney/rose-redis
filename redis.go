@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	red "github.com/go-redis/redis/v8"
+	red "github.com/redis/go-redis/v9"
 	"time"
 )
 
