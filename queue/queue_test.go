@@ -19,7 +19,7 @@ import (
 func TestNewSQueue(t *testing.T) {
 
 	client, _ := rredis.NewRedis("127.0.0.1:6379", &rredis.Option{
-		Db:   3,
+		DB:   3,
 		Type: rredis.TypeNode,
 	})
 

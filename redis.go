@@ -48,10 +48,11 @@ type (
 
 	Option struct {
 		isCluster bool
-		Type      RType
-		Pass      string
-		Db        int
-		Tls       bool
+		//
+		Type RType
+		Pass string
+		DB   int
+		Tls  bool
 	}
 
 	Redis struct {
@@ -87,18 +88,7 @@ type (
 	StringCmd = red.StringCmd
 )
 
-// MustNewRedis returns a Redis with given options.
-func MustNewRedis(addr string, opts *Option) *Redis {
-	rds, err := NewRedis(addr, opts)
-	if err != nil {
-		msg := fmt.Sprintf("%+v\n\n", err.Error())
-		panic(msg)
-	}
-
-	return rds
-}
-
-func NewRedis(addr string, opt *Option) (*Redis, error) {
+func NewClient(addr string, opt *Option) *Redis {
 	rdc := loadOption(opt)
 	r := new(Redis)
 
@@ -124,7 +114,7 @@ func NewRedis(addr string, opt *Option) (*Redis, error) {
 		options := &red.Options{
 			Addr:         addr,
 			Password:     rdc.Pass,
-			DB:           rdc.Db,
+			DB:           rdc.DB,
 			MaxRetries:   maxRetries,
 			MinIdleConns: idleConns,
 		}
@@ -132,10 +122,26 @@ func NewRedis(addr string, opt *Option) (*Redis, error) {
 		r = &Redis{client: client, ctx: context.Background()}
 	}
 
+	return r
+}
+
+func NewRedis(addr string, opt *Option) (*Redis, error) {
+	r := NewClient(addr, opt)
 	if !r.Ping() {
 		return nil, errors.New("error Ping")
 	}
 	return r, nil
+}
+
+// MustNewRedis returns a Redis with given options.
+func MustNewRedis(addr string, opts *Option) *Redis {
+	rds, err := NewRedis(addr, opts)
+	if err != nil {
+		msg := fmt.Sprintf("%+v\n\n", err.Error())
+		panic(msg)
+	}
+
+	return rds
 }
 
 //func newRedis(addr string, opt *Option) *Option {
@@ -143,7 +149,7 @@ func NewRedis(addr string, opt *Option) (*Redis, error) {
 //r := &Redis{
 //	Addr: addr,
 //	Type: TypeNode,
-//	Db:   defDatabase,
+//	DB:   defDatabase,
 //	Pass:  "",
 //}
 //
@@ -162,7 +168,7 @@ func NewRedis(addr string, opt *Option) (*Redis, error) {
 func loadOption(opt *Option) *Option {
 	o := &Option{
 		Type:      TypeNode,
-		Db:        defDatabase,
+		DB:        defDatabase,
 		isCluster: false,
 		Pass:      "",
 		Tls:       false,
@@ -171,8 +177,8 @@ func loadOption(opt *Option) *Option {
 	if opt == nil {
 		return o
 	}
-	if opt.Db > 0 {
-		o.Db = opt.Db
+	if opt.DB > 0 {
+		o.DB = opt.DB
 	}
 	if len(opt.Pass) > 0 {
 		o.Pass = opt.Pass
