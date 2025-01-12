@@ -777,3 +777,43 @@ func (s *Redis) ZUnionStoreCtx(ctx context.Context, dest string, store *ZStore) 
 	val int64, err error) {
 	return s.client.ZUnionStore(ctx, dest, store).Result()
 }
+
+// ---------
+
+func (s *Redis) ZPopMin(key string, count int64) (val []Pair, err error) {
+	return s.ZPopMinCtx(s.ctx, key, count)
+}
+
+func (s *Redis) ZPopMinCtx(ctx context.Context, key string, count int64) (val []Pair, err error) {
+	v, err := s.client.ZPopMin(ctx, key, count).Result()
+	val = toPairs(v)
+	return
+}
+
+func (s *Redis) ZPopMax(key string, count int64) (val []Pair, err error) {
+	return s.ZPopMaxCtx(s.ctx, key, count)
+}
+
+func (s *Redis) ZPopMaxCtx(ctx context.Context, key string, count int64) (val []Pair, err error) {
+	v, err := s.client.ZPopMax(ctx, key, count).Result()
+	val = toPairs(v)
+	return
+}
+
+//func (s *Redis) ZMPop(key string, count int64) (val []Pair, err error) {
+//	return s.ZPopMinCtx(s.ctx, key, count)
+//}
+//
+//func (s *Redis) ZMPopCtx(ctx context.Context, key string, count int64) (val []Pair, err error) {
+//
+//	return
+//}
+
+func (s *Redis) ZMScore(key string, members ...string) (val []float64, err error) {
+	return s.ZMScoreCtx(s.ctx, key, members...)
+}
+
+func (s *Redis) ZMScoreCtx(ctx context.Context, key string, members ...string) (val []float64, err error) {
+	val, err = s.client.ZMScore(ctx, key, members...).Result()
+	return
+}
