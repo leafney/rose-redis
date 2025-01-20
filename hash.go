@@ -96,32 +96,32 @@ func (s *Redis) HMGetCtx(ctx context.Context, key string, fields ...string) (val
 }
 
 // HSet is the implementation of redis hset command.
-func (s *Redis) HSet(key, field, value string) error {
+func (s *Redis) HSet(key, field string, value interface{}) error {
 	return s.HSetCtx(s.ctx, key, field, value)
 }
 
 // HSetCtx is the implementation of redis hset command.
-func (s *Redis) HSetCtx(ctx context.Context, key, field, value string) error {
+func (s *Redis) HSetCtx(ctx context.Context, key, field string, value interface{}) error {
 	return s.client.HSet(ctx, key, field, value).Err()
 }
 
 // HSetNX is the implementation of redis hsetnx command.
-func (s *Redis) HSetNX(key, field, value string) (bool, error) {
+func (s *Redis) HSetNX(key, field string, value interface{}) (bool, error) {
 	return s.HSetNXCtx(s.ctx, key, field, value)
 }
 
 // HSetNXCtx is the implementation of redis hsetnx command.
-func (s *Redis) HSetNXCtx(ctx context.Context, key, field, value string) (val bool, err error) {
+func (s *Redis) HSetNXCtx(ctx context.Context, key, field string, value interface{}) (val bool, err error) {
 	return s.client.HSetNX(ctx, key, field, value).Result()
 }
 
 // HMSet is the implementation of redis hmset command.
-func (s *Redis) HMSet(key string, fieldsAndValues map[string]string) error {
+func (s *Redis) HMSet(key string, fieldsAndValues map[string]interface{}) error {
 	return s.HMSetCtx(s.ctx, key, fieldsAndValues)
 }
 
 // HMSetCtx is the implementation of redis hmset command.
-func (s *Redis) HMSetCtx(ctx context.Context, key string, fieldsAndValues map[string]string) error {
+func (s *Redis) HMSetCtx(ctx context.Context, key string, fieldsAndValues map[string]interface{}) error {
 	vals := make(map[string]interface{}, len(fieldsAndValues))
 	for k, v := range fieldsAndValues {
 		vals[k] = v

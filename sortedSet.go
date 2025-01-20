@@ -43,7 +43,7 @@ func (s *Redis) ZAdds(key string, ps ...Pair) (int64, error) {
 func (s *Redis) ZAddsCtx(ctx context.Context, key string, ps ...Pair) (val int64, err error) {
 	zs := make([]red.Z, 0)
 	for _, p := range ps {
-		z := red.Z{Score: float64(p.Score), Member: p.Key}
+		z := red.Z{Score: float64(p.Score), Member: p.Member}
 		zs = append(zs, z)
 	}
 
@@ -255,6 +255,20 @@ func (s *Redis) ZRangeByScoreAndLimitCtx(ctx context.Context, key string, min, m
 	val, err = s.client.ZRangeByScore(ctx, key, &red.ZRangeBy{
 		Min:    min,
 		Max:    max,
+		Offset: page * size,
+		Count:  size,
+	}).Result()
+	return
+}
+
+func (s *Redis) ZRangeByScoreInt64AndLimit(key string, min, max int64, page, size int64) (val []string, err error) {
+	return s.ZRangeByScoreInt64AndLimitCtx(s.ctx, key, min, max, page, size)
+}
+
+func (s *Redis) ZRangeByScoreInt64AndLimitCtx(ctx context.Context, key string, min, max int64, page, size int64) (val []string, err error) {
+	val, err = s.client.ZRangeByScore(ctx, key, &red.ZRangeBy{
+		Min:    strconv.FormatInt(min, 10),
+		Max:    strconv.FormatInt(max, 10),
 		Offset: page * size,
 		Count:  size,
 	}).Result()
@@ -815,5 +829,20 @@ func (s *Redis) ZMScore(key string, members ...string) (val []float64, err error
 
 func (s *Redis) ZMScoreCtx(ctx context.Context, key string, members ...string) (val []float64, err error) {
 	val, err = s.client.ZMScore(ctx, key, members...).Result()
+	return
+}
+
+func (s *Redis) ZRandMember(key string, count int) (val []string, err error) {
+	return s.ZRandMemberCtx(s.ctx, key, count)
+}
+
+func (s *Redis) ZRandMemberCtx(ctx context.Context, key string, count int) (val []string, err error) {
+	val, err = s.client.ZRandMember(ctx, key, count).Result()
+	return
+}
+
+func (s *Redis) ZRandMemberWithScoresCtx(ctx context.Context, key string, count int) (val []Pair, err error) {
+	v, err := s.client.ZRandMemberWithScores(ctx, key, count).Result()
+	val = toPairs(v)
 	return
 }

@@ -112,13 +112,13 @@ func toPairs(vals []red.Z) []Pair {
 		switch member := val.Member.(type) {
 		case string:
 			pairs[i] = Pair{
-				Key:   member,
-				Score: int64(val.Score),
+				Member: member,
+				Score:  int64(val.Score),
 			}
 		default:
 			pairs[i] = Pair{
-				Key:   Repr(val.Member),
-				Score: int64(val.Score),
+				Member: Repr(val.Member),
+				Score:  int64(val.Score),
 			}
 		}
 	}
@@ -132,13 +132,13 @@ func toFloatPairs(vals []red.Z) []FloatPair {
 		switch member := val.Member.(type) {
 		case string:
 			pairs[i] = FloatPair{
-				Key:   member,
-				Score: val.Score,
+				Member: member,
+				Score:  val.Score,
 			}
 		default:
 			pairs[i] = FloatPair{
-				Key:   Repr(val.Member),
-				Score: val.Score,
+				Member: Repr(val.Member),
+				Score:  val.Score,
 			}
 		}
 	}
